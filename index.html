@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>O Som das Seis - Ficha de Personagem</title>
+ <link href="https://fonts.googleapis.com/css2?family=Rye&family=Special+Elite&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+ <div class="container">
+  <h1> O SOM DAS SEIS </h1>
+
+  <div class="buttons-row">
+   <button class="btn" onclick="salvarFicha()">💾 Salvar Ficha</button>
+   <button class="btn" onclick="novaFicha()">📄 Nova Ficha</button>
+   <button class="btn" onclick="carregarFichaManual()">📂 Carregar Ficha</button>
+  </div>
+
+  <div class="ficha-grid">
+      <div class="secao secao-ampla">
+    <div class="secao-header">Informações do Personagem</div>
+    <div class="campo">
+     <label>Nome</label>
+     <input type="text" id="nome" placeholder="Nome do pistoleiro">
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+     <div class="campo">
+      <label>Nível</label>
+      <input type="number" id="nivel" value="1" min="1">
+     </div>
+     <div class="campo">
+      <label>R$</label>
+      <input type="number" id="dinheiro" value="0" min="0">
+     </div>
+    </div>
+   </div>
+
+      <div class="secao secao-ampla">
+    <div class="secao-header">Atributos</div>
+    <div class="atributos-grid" style="grid-template-columns: repeat(4, 1fr);">
+     <div class="atributo-box">
+      <label>Físico</label>
+      <div class="dice-container">
+       <input type="number" id="fisico" value="0" oninput="calcularValores()">
+       <button class="btn-dice" onclick="rolarDado('fisico')" title="Rolar 1d6">🎲</button>
+      </div>
+     </div>
+     <div class="atributo-box">
+      <label>Agilidade</label>
+      <div class="dice-container">
+       <input type="number" id="agilidade" value="0" oninput="calcularValores()">
+       <button class="btn-dice" onclick="rolarDado('agilidade')" title="Rolar 1d6">🎲</button>
+      </div>
+     </div>
+     <div class="atributo-box">
+      <label>Intelecto</label>
+      <div class="dice-container">
+       <input type="number" id="intelecto" value="0" oninput="calcularValores()">
+       <button class="btn-dice" onclick="rolarDado('intelecto')" title="Rolar 1d6">🎲</button>
+      </div>
+     </div>
+     <div class="atributo-box">
+      <label>Coragem</label>
+      <div class="dice-container">
+       <input type="number" id="coragem" value="0" oninput="calcularValores()">
+       <button class="btn-dice" onclick="rolarDado('coragem')" title="Rolar 1d6">🎲</button>
+      </div>
+     </div>
+    </div>
+   </div>
+
+      <div class="secao">
+    <div class="secao-header">Status</div>
+    <div class="status-box">
+     <label>VIDA</label>
+     <div class="status-inputs">
+      <input type="number" id="vida" value="10">
+      <span class="status-separator">/</span>
+      <input type="number" id="vidaMax" value="10">
+     </div>
+    </div>
+        
+        <div class="check-box-status">
+     <div class="check-item">
+      <label for="agua">ÁGUA</label>
+      <input type="checkbox" id="agua">
+     </div>
+     <div class="check-item">
+      <label for="comida">COMIDA</label>
+      <input type="checkbox" id="comida">
+     </div>
+    </div>
+   </div>
+
+      <div class="secao">
+    <div class="secao-header">Combate</div>
+    <div class="combate-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+     <div class="combate-box">
+      <label>DEFESA</label>
+      <div class="combate-valor" id="defesaTotal">5</div>
+      <div style="margin-top: 10px;">
+       <input type="number" id="defesaBonus" value="0" placeholder="+Bônus" oninput="calcularValores()">
+      </div>
+     </div>
+     <div class="combate-box">
+      <label>AÇÕES</label>
+      <div class="combate-valor" id="acoesTotal">1</div>
+      <div style="margin-top: 10px;">
+       <input type="number" id="acoesBonus" value="0" placeholder="+Bônus" oninput="calcularValores()">
+      </div>
+     </div>
+      <div class="combate-box">
+      <label>INICIATIVA</label>
+      <div class="combate-valor" id="iniciativaTotal">1</div>
+      <div style="margin-top: 10px;">
+       <input type="number" id="iniciativaBonus" value="0" placeholder="+Bônus" oninput="calcularValores()">
+       <button class="btn-dice" onclick="rolarDado('iniciativaBonus')" title="Rolar 1d6" style="width: 100%; margin-top: 5px; padding: 6px;">🎲</button>
+      </div>
+     </div>
+    </div>
+   </div>
+
+   <div class="secao tormento-box">
+ <div class="secao-header">Tormento</div>
+ <div style="display: flex; justify-content: center; align-items: center; min-height: 150px; padding: 20px;">
+  <input type="text" id="tormento" value="" placeholder="Descreva o tormento..." class="tormento-input">
+ </div>
+</div>
+
+      <div class="secao secao-ampla">
+    <div class="secao-header">Antecedentes</div>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+     <div class="campo">
+      <label>Combate</label>
+      <div class="dice-container">
+       <input type="number" class="antecedente" id="combate" value="0">
+       <button class="btn-dice" onclick="rolarDado('combate')" title="Rolar 1d6">🎲</button>
+      </div>
+     </div>
+     <div class="campo">
+      <label>Negócios</label>
+      <div class="dice-container">
+       <input type="number" class="antecedente" id="negocios" value="0">
+       <button class="btn-dice" onclick="rolarDado('negocios')" title="Rolar 1d6">🎲</button>
+      </div>
+     </div>
+     <div class="campo">
+      <label>Montaria</label>
+      <div class="dice-container">
+       <input type="number" class="antecedente" id="montaria" value="0">
+       <button class="btn-dice" onclick="rolarDado('montaria')" title="Rolar 1d6">🎲</button>
+      </div>
+     </div>
+     <div class="campo">
+      <label>Tradição</label>
+      <div class="dice-container">
+       <input type="number" class="antecedente" id="tradicao" value="0">
+       <button class="btn-dice" onclick="rolarDado('tradicao')" title="Rolar 1d6">🎲</button>
+      </div>
+     </div>
+     <div class="campo">
+      <label>Labuta</label>
+      <div class="dice-container">
+       <input type="number" class="antecedente" id="labuta" value="0">
+       <button class="btn-dice" onclick="rolarDado('labuta')" title="Rolar 1d6">🎲</button>
+      </div>
+     </div>
+     <div class="campo">
+      <label>Exploração</label>
+      <div class="dice-container">
+       <input type="number" class="antecedente" id="exploracao" value="0">
+       <button class="btn-dice" onclick="rolarDado('exploracao')" title="Rolar 1d6">🎲</button>
+      </div>
+     </div>
+     <div class="campo">
+      <label>Roubo</label>
+      <div class="dice-container">
+       <input type="number" class="antecedente" id="roubo" value="0">
+       <button class="btn-dice" onclick="rolarDado('roubo')" title="Rolar 1d6">🎲</button>
+      </div>
+     </div>
+     <div class="campo">
+      <label>Medicina</label>
+      <div class="dice-container">
+       <input type="number" class="antecedente" id="medicina" value="0">
+       <button class="btn-dice" onclick="rolarDado('medicina')" title="Rolar 1d6">🎲</button>
+      </div>
+     </div>
+     <div class="campo">
+      <label>Tecnologia</label>
+      <div class="dice-container">
+       <input type="number" class="antecedente" id="tecnologia" value="0">
+       <button class="btn-dice" onclick="rolarDado('tecnologia')" title="Rolar 1d6">🎲</button>
+      </div>
+     </div>
+     <div class="campo">
+      <label>Culinária</label>
+      <div class="dice-container">
+       <input type="number" class="antecedente" id="culinaria" value="0">
+       <button class="btn-dice" onclick="rolarDado('culinaria')" title="Rolar 1d6">🎲</button>
+      </div>
+     </div>
+     <div class="campo">
+      <label>Doméstico</label>
+      <div class="dice-container">
+       <input type="number" class="antecedente" id="domestico" value="0">
+       <button class="btn-dice" onclick="rolarDado('domestico')" title="Rolar 1d6">🎲</button>
+      </div>
+     </div>
+     <div class="campo">
+      <label>Direção</label>
+      <div class="dice-container">
+       <input type="number" class="antecedente" id="direcao" value="0">
+       <button class="btn-dice" onclick="rolarDado('direcao')" title="Rolar 1d6">🎲</button>
+      </div>
+     </div>
+    </div>
+   </div>
+
+      <div class="secao secao-ampla">
+    <div class="secao-header">Habilidades</div>
+    <button class="btn btn-small" onclick="adicionarHabilidade()">+ Adicionar Habilidade</button>
+    <div id="habilidadesContainer" class="lista-items"></div>
+   </div>
+
+      <div class="secao secao-ampla">
+    <div class="secao-header">Inventário</div>
+    <button class="btn btn-small" onclick="adicionarItem()">+ Adicionar Item</button>
+    <div id="inventarioContainer" class="lista-items"></div>
+   </div>
+
+      <div class="secao secao-dupla">
+    <div class="secao-header">Recompensas</div>
+    <div class="campo">
+     <textarea id="recompensas" placeholder="Descreva as recompensas e conquistas do personagem..."></textarea>
+     <label style="margin-top: 10px;">Valor da Recompensa (R$)</label>
+     <input type="number" id="valorRecompensa" value="0" min="0" style="margin-top: 5px;">
+    </div>
+   </div>
+
+      <div class="secao">
+    <div class="secao-header">Reputação</div>
+    <div style="padding: 20px;">
+     <div class="honra-bar">
+      <div class="honra-gradient"></div>
+      <div class="honra-marker" id="honraMarker"></div>
+     </div>
+     <div style="text-align: center; margin-top: 15px;">
+      <label>Pontos de Reputação</label>
+      <input type="number" id="honraValor" value="0" min="-15" max="15" oninput="atualizarHonra()" style="width: 80px; text-align: center; margin-top: 5px;">
+     </div>
+    </div>
+   </div>
+  </div>
+
+    <div class="secao montaria-secao">
+   <div class="secao-header">MONTARIA</div>
+   <div class="montaria-grid">
+        <div class="campo montaria-nome">
+     <label>Nome da Montaria</label>
+     <input type="text" id="montariaNome" placeholder="Nome do companheiro">
+    </div>
+
+    <div class="montaria-combate-atributos">
+        <div class="secao-header-mini">Combate</div>
+        <div class="combate-grid" style="grid-template-columns: 1fr 1fr;">
+        <div class="combate-box">
+            <label class="label-vida-montaria" style="color: #ff6666; font-family: 'Rye', cursive;">VIDA</label>
+            <div class="status-inputs" style="margin-top: 5px;">
+                <input type="number" id="montariaPV" value="5" title="Vida Atual">
+                <span class="status-separator">/</span>
+                <input type="number" id="montariaPVMax" value="5" title="Vida Máxima">
+            </div>
+        </div>
+          <div class="combate-box">
+                      <label class="label-dano-montaria">DANO (1d6+Pot+Bônus)</label>
+                      <div class="dice-container" style="flex-direction: column; gap: 8px;">
+                          <input type="number" id="montariaDanoBonus" value="0" placeholder="Bônus" title="Bônus extra de dano">
+                          <button class="btn-dice" onclick="rolarDanoMontaria()" style="width: 100%;">🎲</button>
+                      </div>
+                  </div>
+        </div>
+            
+        <div class="secao-header-mini" style="margin-top: 15px;">Atributos</div>
+        <div class="atributos-grid" style="grid-template-columns: 1fr 1fr;">
+            <div class="atributo-box">
+                <label>Potência</label>
+                <div class="dice-container">
+                    <input type="number" id="montariaPotencia" value="0">
+                    <button class="btn-dice" onclick="rolarDado('montariaPotencia')" title="Rolar Potência">🎲</button>
+                </div>
+            </div>
+            <div class="atributo-box">
+                <label>Resistência</label>
+                <div class="dice-container">
+                    <input type="number" id="montariaResistencia" value="0">
+                    <button class="btn-dice" onclick="rolarDado('montariaResistencia')" title="Rolar Resistência">🎲</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <div class="montaria-inventario">
+     <div class="secao-header-mini">Inventário da Montaria</div>
+     <button class="btn btn-small" onclick="adicionarItemMontaria()">+ Adicionar Item</button>
+     <div id="inventarioMontariaContainer" class="lista-items"></div>
+    </div>
+   </div>
+  </div>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
