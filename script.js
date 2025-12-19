@@ -1,5 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { 
+    getFirestore, doc, setDoc, getDoc, collection, addDoc, serverTimestamp, getDocs, query, where 
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyCp5slzZKVuMQ5N86zv2vXbvMGEeNwem94",
@@ -14,14 +16,22 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// --- FUNÇÕES DE BANCO DE DADOS ---
+// --- CONTROLE DE ID ÚNICO ---
+let idFichaAtual = localStorage.getItem('idFichaAtual') || null;
 
 async function salvarFichaFirebase() {
     const nomePersonagem = document.getElementById('nome').value.trim();
-    if (!nomePersonagem) { alert("Nome necessário!"); return; }
+    if (!nomePersonagem) return;
+
+    // Se não tem ID, cria um fixo baseado no nome + timestamp (apenas na criação)
+    if (!idFichaAtual) {
+        idFichaAtual = nomePersonagem.replace(/\s+/g, '_') + "_" + Date.now();
+        localStorage.setItem('idFichaAtual', idFichaAtual);
+    }
 
     const ficha = {
-        nome: nomePersonagem,
+        id: idFichaAtual, // ID fixo que nunca muda
+        nome: nomePersonagem, // O nome pode mudar, o ID não
         nivel: document.getElementById('nivel').value,
         dinheiro: document.getElementById('dinheiro').value,
         fisico: document.getElementById('fisico').value,
@@ -59,26 +69,31 @@ async function salvarFichaFirebase() {
         montariaResistencia: document.getElementById('montariaResistencia').value,
         habilidades: extrairLista('habilidadesContainer'),
         inventario: extrairLista('inventarioContainer'),
-        inventarioMontaria: extrairLista('inventarioMontariaContainer')
+        inventarioMontaria: extrairLista('inventarioMontariaContainer'),
+        ultimaAtualizacao: serverTimestamp()
     };
 
     try {
-        await setDoc(doc(db, "fichas", nomePersonagem), ficha);
-        localStorage.setItem('ultimoPersonagem', nomePersonagem);
-        alert(`Ficha de "${nomePersonagem}" salva!`);
+        // Salva sempre no documento com o ID único
+        await setDoc(doc(db, "fichas", idFichaAtual), ficha);
+        localStorage.setItem('ultimoIDSalvo', idFichaAtual); 
+        console.log("Ficha sincronizada com sucesso!");
     } catch (e) { console.error("Erro ao salvar:", e); }
 }
 
 async function carregarFichaManual() {
-    const nomeBusca = prompt("Digite o nome exato do personagem:");
+    const nomeBusca = prompt("Digite o nome exato do personagem para buscar:");
     if (!nomeBusca) return;
 
     try {
-        const docRef = doc(db, "fichas", nomeBusca);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-            preencherCampos(docSnap.data());
-            localStorage.setItem('ultimoPersonagem', nomeBusca);
+        // Como o ID agora é aleatório, buscamos pelo campo 'nome'
+        const q = query(collection(db, "fichas"), where("nome", "==", nomeBusca));
+        const querySnapshot = await getDocs(q);
+        
+        if (!querySnapshot.empty) {
+            const fichaData = querySnapshot.docs[0].data();
+            preencherCampos(fichaData);
+            alert("Ficha carregada!");
         } else {
             alert("Personagem não encontrado.");
         }
@@ -88,6 +103,11 @@ async function carregarFichaManual() {
 // --- FUNÇÕES DE INTERFACE ---
 
 function preencherCampos(ficha) {
+    if (ficha.id) {
+        idFichaAtual = ficha.id;
+        localStorage.setItem('idFichaAtual', idFichaAtual);
+    }
+
     document.getElementById('habilidadesContainer').innerHTML = '';
     document.getElementById('inventarioContainer').innerHTML = '';
     document.getElementById('inventarioMontariaContainer').innerHTML = '';
@@ -134,19 +154,44 @@ function carregarListaItens(lista, funcAdicionar, containerId) {
     });
 }
 
-// --- SISTEMA DE DADOS E CÁLCULOS ---
+// --- SISTEMA DE DADOS ---
+
+async function registrarRolagemNoFirebase(tipo, dado, bonus, total) {
+    const player = document.getElementById('nome').value.trim() || "Pistoleiro Misterioso";
+    try {
+        await addDoc(collection(db, "rolagens"), {
+            player: player,
+            tipo: tipo,
+            dado: dado,
+            bonus: bonus,
+            total: total,
+            timestamp: serverTimestamp()
+        });
+    } catch (e) { console.error("Erro ao registrar rolagem:", e); }
+}
 
 window.rolarDado = function(campoId) {
     const resultadoDado = Math.floor(Math.random() * 6) + 1;
     const campo = document.getElementById(campoId);
-    const valorAtual = campo ? (parseInt(campo.value) || 0) : 0;
-    mostrarResultadoDado(resultadoDado, valorAtual, valorAtual + resultadoDado);
+    let valorBonus = campo ? (parseInt(campo.value) || 0) : 0;
+    let nomeDoTeste = "";
+
+    if (campoId === 'iniciativaBonus') {
+        const coragem = parseInt(document.getElementById('coragem').value) || 0;
+        valorBonus = valorBonus + coragem + 1; 
+        nomeDoTeste = "Iniciativa";
+    } else {
+        const labelElement = campo.closest('.campo, .atributo-box')?.querySelector('label');
+        nomeDoTeste = labelElement ? labelElement.textContent.trim() : campoId;
+    }
+
+    mostrarResultadoDado(resultadoDado, valorBonus, valorBonus + resultadoDado);
+    registrarRolagemNoFirebase(nomeDoTeste, resultadoDado, valorBonus, valorBonus + resultadoDado);
 };
 
 function mostrarResultadoDado(resultadoDado, valorCampo, resultadoTotal) {
     const resultDiv = document.createElement('div');
     resultDiv.className = 'dice-result';
-    
     let criticoLabel = '';
     
     if (resultadoDado === 6) {
@@ -164,17 +209,13 @@ function mostrarResultadoDado(resultadoDado, valorCampo, resultadoTotal) {
     `;
     
     document.body.appendChild(resultDiv);
-    
-    // Força o navegador a processar o elemento antes da animação
-    void resultDiv.offsetWidth; 
-
     setTimeout(() => {
-        // Remove as classes de crítico antes de aplicar a animação de saída
-        resultDiv.classList.remove('critico-sucesso', 'critico-falha');
         resultDiv.style.animation = 'diceOut 0.3s ease-out forwards';
         setTimeout(() => resultDiv.remove(), 300);
     }, 2000);
 }
+
+// --- CÁLCULOS E UI ---
 
 window.calcularValores = function() {
     const agilidade = parseInt(document.getElementById('agilidade').value) || 0;
@@ -193,20 +234,55 @@ window.atualizarHonra = function() {
     document.getElementById('honraMarker').style.left = ((val + 15) / 30 * 100) + '%';
 };
 
+window.novaFicha = () => {
+    if(confirm('Isso apagará os dados locais e criará uma nova ficha. Continuar?')) {
+        localStorage.removeItem('idFichaAtual');
+        localStorage.removeItem('ultimoIDSalvo');
+        location.reload();
+    }
+};
+
+// --- AUTO-SALVAMENTO ---
+let timeoutSalvar = null;
+function autoSalvar() {
+    clearTimeout(timeoutSalvar);
+    timeoutSalvar = setTimeout(() => {
+        salvarFichaFirebase();
+    }, 1500); 
+}
+
+// --- INICIALIZAÇÃO E EVENTOS ---
+window.addEventListener('load', async () => {
+    // Carrega a última ficha usada neste navegador
+    const idSalvo = localStorage.getItem('idFichaAtual');
+    if (idSalvo) {
+        const docRef = doc(db, "fichas", idSalvo);
+        const s = await getDoc(docRef);
+        if (s.exists()) preencherCampos(s.data());
+    }
+
+    // Ativa escuta para auto-salvar
+    const inputs = document.querySelectorAll('input, textarea');
+    inputs.forEach(input => {
+        input.addEventListener('input', autoSalvar);
+        input.addEventListener('change', autoSalvar);
+    });
+
+    window.calcularValores();
+    window.atualizarHonra();
+});
+
+// Exportação de funções para botões HTML
+window.salvarFicha = salvarFichaFirebase;
+window.carregarFichaManual = carregarFichaManual;
 window.adicionarHabilidade = function() {
     const div = document.createElement('div');
     div.className = 'item-box';
     div.innerHTML = `<input type="text" placeholder="Habilidade"><textarea placeholder="Descrição..."></textarea><button class="btn btn-small btn-danger" onclick="this.parentElement.remove()">Remover</button>`;
     document.getElementById('habilidadesContainer').appendChild(div);
 };
-
-window.adicionarItem = function() {
-    adicionarEstruturaItem(document.getElementById('inventarioContainer'), "Item");
-};
-
-window.adicionarItemMontaria = function() {
-    adicionarEstruturaItem(document.getElementById('inventarioMontariaContainer'), "Equipamento");
-};
+window.adicionarItem = () => adicionarEstruturaItem(document.getElementById('inventarioContainer'), "Item");
+window.adicionarItemMontaria = () => adicionarEstruturaItem(document.getElementById('inventarioMontariaContainer'), "Equipamento");
 
 function adicionarEstruturaItem(container, placeholder) {
     const div = document.createElement('div');
@@ -220,32 +296,7 @@ function adicionarEstruturaItem(container, placeholder) {
         <textarea placeholder="Descrição..." style="display: none;"></textarea>`;
     container.appendChild(div);
 }
-
 window.toggleDescricao = (btn) => {
     const txt = btn.parentElement.parentElement.querySelector('textarea');
     txt.style.display = (txt.style.display === 'none') ? 'block' : 'none';
 };
-
-window.rolarDanoMontaria = function() {
-    const d = Math.floor(Math.random() * 6) + 1;
-    const p = parseInt(document.getElementById('montariaPotencia').value) || 0;
-    const b = parseInt(document.getElementById('montariaDanoBonus').value) || 0;
-    mostrarResultadoDado(d, p + b, d + p + b);
-};
-
-window.novaFicha = () => confirm('Limpar tudo?') && (localStorage.removeItem('ultimoPersonagem'), location.reload());
-
-// --- EXPORTAR PARA O WINDOW ---
-window.salvarFicha = salvarFichaFirebase;
-window.carregarFichaManual = carregarFichaManual;
-
-// --- INICIALIZAÇÃO ---
-window.addEventListener('load', () => {
-    const ultimo = localStorage.getItem('ultimoPersonagem');
-    if (ultimo) {
-        const docRef = doc(db, "fichas", ultimo);
-        getDoc(docRef).then(s => s.exists() && preencherCampos(s.data()));
-    }
-    window.calcularValores();
-    window.atualizarHonra();
-});

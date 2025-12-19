@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Mestre - O Som das Seis</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rye&family=Special+Elite&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .mestre-container { display: flex; gap: 20px; padding: 20px; }
+        .grid-players { flex: 3; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
+        .log-lateral { flex: 1; background: rgba(0,0,0,0.3); border: 2px solid #8b6f47; border-radius: 8px; padding: 15px; height: 85vh; overflow-y: auto; }
+        
+        .card-player { background: #1a1410; border: 2px solid #5a4a3a; padding: 15px; border-radius: 8px; position: relative; }
+        .card-header { font-family: 'Rye', cursive; color: #d4a574; border-bottom: 1px solid #5a4a3a; margin-bottom: 10px; }
+        .status-mini { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.9em; }
+        .vida-barra { background: #331111; height: 10px; border-radius: 5px; overflow: hidden; margin-top: 5px; }
+        .vida-progresso { background: #ff4444; height: 100%; transition: width 0.3s; }
+        
+        .log-item { background: #2a1f1a; border-left: 4px solid #d4a574; padding: 8px; margin-bottom: 10px; font-size: 0.8em; animation: fadeIn 0.3s ease; }
+        .log-nome { color: #c9a96e; font-weight: bold; display: block; }
+        .log-detalhe { font-style: italic; color: #e8dcc0; }
+        .log-resultado { float: right; font-size: 1.5em; color: #d4a574; font-family: 'Rye', cursive; }
+
+    .info-combat-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: rgba(0, 0, 0, 0.4);
+        padding: 8px 12px;
+        border-radius: 4px;
+        border: 1px solid #5a4a3a;
+        margin-bottom: 15px;
+        font-family: 'Special Elite', monospace;
+    }
+
+    .info-combat-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.85em;
+        color: #c9a96e;
+    }
+
+    .info-combat-item b {
+        color: #e8dcc0;
+        font-size: 1.1em;
+    }
+
+    .divider {
+        color: #5a4a3a;
+        font-weight: bold;
+    }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+    </style>
+</head>
+<body>
+    <h1>PAINEL DO MESTRE</h1>
+    <div class="mestre-container">
+        <div id="gridPlayers" class="grid-players"></div>
+
+        <div class="log-lateral">
+            <h3 style="font-family: 'Rye'; text-align: center; color: #d4a574;">Últimas Rolagens</h3>
+            <div id="logRolagens"></div>
+        </div>
+    </div>
+
+    <script type="module" src="mestre.js"></script>
+</body>
+</html>
