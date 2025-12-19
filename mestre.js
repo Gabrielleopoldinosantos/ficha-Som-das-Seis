@@ -43,7 +43,7 @@ grid.innerHTML += `
         <div class="card-header">${p.nome || "Pistoleiro"}</div>
         <div class="card-body">
             <div class="status-mini">
-                <span>❤️ PV: ${p.vida}/${p.vidaMax}</span>
+                <span>PV: ${p.vida}/${p.vidaMax}</span>
                 <span>${p.agua ? "💧" : "💀"} ${p.comida ? "🍖" : "💀"}</span>
             </div>
             <div class="vida-barra">
