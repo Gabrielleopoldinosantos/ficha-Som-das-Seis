@@ -828,3 +828,60 @@ input[type="number"]::-webkit-outer-spin-button {
     color: #ff4444;
     margin: 0 5px;
 }
+
+/* --- ESTILO DOS ANTECEDENTES (PIPS) --- */
+.campo-antecedente {
+    margin-bottom: 15px;
+}
+
+.pips-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 8px 12px;
+    border: 1px solid #5a4a3a;
+    border-radius: 6px;
+}
+
+.pips-container {
+    display: flex;
+    gap: 6px;
+    flex: 1;
+    justify-content: flex-start;
+}
+
+.pip {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #8b6f47;
+    cursor: pointer;
+    background: #1a1410;
+    transition: all 0.2s ease;
+    border-radius: 2px; /* Quadrados com cantos levemente arredondados */
+}
+
+/* Quadrado preenchido */
+.pip.filled {
+    background-color: #d4a574 !important; /* Ou a cor de sua preferência */
+    box-shadow: 0 0 5px #d4a574;
+}
+
+.pip:hover {
+    transform: scale(1.2);
+    border-color: #d4a574;
+}
+
+.campo-antecedente label {
+    margin-bottom: 8px;
+    color: #d4a574;
+    font-size: 0.9em;
+    letter-spacing: 1px;
+}
+
+/* Reaproveitando seu estilo de botão de dado */
+.pips-row .btn-dice {
+    padding: 5px 10px;
+    font-size: 1em;
+    min-width: 35px;
+}
