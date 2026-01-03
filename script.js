@@ -77,18 +77,18 @@ async function salvarFichaFirebase() {
         valorRecompensa: document.getElementById('valorRecompensa').value,
         honraValor: document.getElementById('honraValor').value,
         // Antecedentes
-        combate: document.getElementById('combate').value,
-        negocios: document.getElementById('negocios').value,
-        montaria: document.getElementById('montaria').value,
-        tradicao: document.getElementById('tradicao').value,
-        labuta: document.getElementById('labuta').value,
-        exploracao: document.getElementById('exploracao').value,
-        roubo: document.getElementById('roubo').value,
-        medicina: document.getElementById('medicina').value,
-        tecnologia: document.getElementById('tecnologia').value,
-        culinaria: document.getElementById('culinaria').value,
-        domestico: document.getElementById('domestico').value,
-        direcao: document.getElementById('direcao').value,
+        combateMod: document.getElementById('combateMod').value,
+        negociosMod: document.getElementById('negociosMod').value,
+        montariaMod: document.getElementById('montariaMod').value,
+        tradicaoMod: document.getElementById('tradicaoMod').value,
+        labutaMod: document.getElementById('labutaMod').value,
+        exploracaoMod: document.getElementById('exploracaoMod').value,
+        rouboMod: document.getElementById('rouboMod').value,
+        medicinaMod: document.getElementById('medicinaMod').value,
+        tecnologiaMod: document.getElementById('tecnologiaMod').value,
+        culinariaMod: document.getElementById('culinariaMod').value,
+        domesticoMod: document.getElementById('domesticoMod').value,
+        direcaoMod: document.getElementById('direcaoMod').value,
         // Montaria
         montariaNome: document.getElementById('montariaNome').value,
         montariaPV: document.getElementById('montariaPV').value,
@@ -167,20 +167,25 @@ async function registrarRolagemNoFirebase(tipo, dado, bonus, total) {
 window.rolarDado = function(campoId) {
     const resultadoDado = Math.floor(Math.random() * 6) + 1;
     const campo = document.getElementById(campoId);
-    let valorBonus = campo ? (parseInt(campo.value) || 0) : 0;
+    
+    // Pips (Valor fixo do antecedente)
+    let valorAntecedente = campo ? (parseInt(campo.value) || 0) : 0;
+    
+    // Modificador (Input de bônus/ônus temporário)
+    const modInput = document.getElementById(campoId + 'Mod');
+    let valorModificador = modInput ? (parseInt(modInput.value) || 0) : 0;
+    
+    // Soma tudo
+    let valorBonusTotal = valorAntecedente + valorModificador;
     let nomeDoTeste = "";
 
-    if (campoId === 'iniciativaBonus') {
-        const coragem = parseInt(document.getElementById('coragem').value) || 0;
-        valorBonus = valorBonus + coragem + 1; 
-        nomeDoTeste = "Iniciativa";
-    } else {
-        const labelElement = campo.closest('.campo-antecedente, .campo, .atributo-box')?.querySelector('label');
-        nomeDoTeste = labelElement ? labelElement.textContent.trim() : campoId;
-    }
+    const labelElement = campo.closest('.campo-antecedente, .campo, .atributo-box')?.querySelector('label');
+    nomeDoTeste = labelElement ? labelElement.textContent.trim() : campoId;
 
-    mostrarResultadoDado(resultadoDado, valorBonus, valorBonus + resultadoDado);
-    registrarRolagemNoFirebase(nomeDoTeste, resultadoDado, valorBonus, valorBonus + resultadoDado);
+    const resultadoFinal = resultadoDado + valorBonusTotal;
+
+    mostrarResultadoDado(resultadoDado, valorBonusTotal, resultadoFinal);
+    registrarRolagemNoFirebase(nomeDoTeste, resultadoDado, valorBonusTotal, resultadoFinal);
 };
 
 function mostrarResultadoDado(resultadoDado, valorCampo, resultadoTotal) {
@@ -325,4 +330,14 @@ window.rolarDanoMontaria = function() {
     
     mostrarResultadoDado(resultadoDado, (potencia + bonus), total);
     registrarRolagemNoFirebase("Dano da Montaria", resultadoDado, (potencia + bonus), total);
+};
+
+window.irParaBase = function() {
+    // Salva a ficha do jogador antes de sair para garantir que nada se perca
+    salvarFichaFirebase(); 
+    
+    document.body.style.opacity = '0';
+    setTimeout(() => {
+        window.location.href = 'base.html';
+    }, 500);
 };

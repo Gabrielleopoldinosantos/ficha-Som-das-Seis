@@ -130,132 +130,39 @@
 
 <div class="secao secao-ampla">
     <div class="secao-header">Antecedentes</div>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
-        <div>
-            <div class="campo-antecedente">
-                <label>Combate</label>
-                <div class="pips-row">
-                    <div class="pips-container" data-ant="combate">
-                        <span class="pip" data-value="1"></span><span class="pip" data-value="2"></span><span class="pip" data-value="3"></span><span class="pip" data-value="4"></span><span class="pip" data-value="5"></span><span class="pip" data-value="6"></span>
-                    </div>
-                    <input type="hidden" id="combate" value="0">
-                    <button class="btn-dice" onclick="rolarDado('combate')">🎲</button>
-                </div>
-            </div>
-            <div class="campo-antecedente">
-                <label>Negócios</label>
-                <div class="pips-row">
-                    <div class="pips-container" data-ant="negocios">
-                        <span class="pip" data-value="1"></span><span class="pip" data-value="2"></span><span class="pip" data-value="3"></span><span class="pip" data-value="4"></span><span class="pip" data-value="5"></span><span class="pip" data-value="6"></span>
-                    </div>
-                    <input type="hidden" id="negocios" value="0">
-                    <button class="btn-dice" onclick="rolarDado('negocios')">🎲</button>
-                </div>
-            </div>
-            <div class="campo-antecedente">
-                <label>Montaria</label>
-                <div class="pips-row">
-                    <div class="pips-container" data-ant="montaria">
-                        <span class="pip" data-value="1"></span><span class="pip" data-value="2"></span><span class="pip" data-value="3"></span><span class="pip" data-value="4"></span><span class="pip" data-value="5"></span><span class="pip" data-value="6"></span>
-                    </div>
-                    <input type="hidden" id="montaria" value="0">
-                    <button class="btn-dice" onclick="rolarDado('montaria')">🎲</button>
-                </div>
-            </div>
-            <div class="campo-antecedente">
-                <label>Tradição</label>
-                <div class="pips-row">
-                    <div class="pips-container" data-ant="tradicao">
-                        <span class="pip" data-value="1"></span><span class="pip" data-value="2"></span><span class="pip" data-value="3"></span><span class="pip" data-value="4"></span><span class="pip" data-value="5"></span><span class="pip" data-value="6"></span>
-                    </div>
-                    <input type="hidden" id="tradicao" value="0">
-                    <button class="btn-dice" onclick="rolarDado('tradicao')">🎲</button>
-                </div>
-            </div>
-            <div class="campo-antecedente">
-                <label>Labuta</label>
-                <div class="pips-row">
-                    <div class="pips-container" data-ant="labuta">
-                        <span class="pip" data-value="1"></span><span class="pip" data-value="2"></span><span class="pip" data-value="3"></span><span class="pip" data-value="4"></span><span class="pip" data-value="5"></span><span class="pip" data-value="6"></span>
-                    </div>
-                    <input type="hidden" id="labuta" value="0">
-                    <button class="btn-dice" onclick="rolarDado('labuta')">🎲</button>
-                </div>
-            </div>
-            <div class="campo-antecedente">
-                <label>Exploração</label>
-                <div class="pips-row">
-                    <div class="pips-container" data-ant="exploracao">
-                        <span class="pip" data-value="1"></span><span class="pip" data-value="2"></span><span class="pip" data-value="3"></span><span class="pip" data-value="4"></span><span class="pip" data-value="5"></span><span class="pip" data-value="6"></span>
-                    </div>
-                    <input type="hidden" id="exploracao" value="0">
-                    <button class="btn-dice" onclick="rolarDado('exploracao')">🎲</button>
-                </div>
-            </div>
-        </div>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+        <script>
+            const antecedentes = [
+                {id: 'combate', nome: 'Combate'}, {id: 'negocios', nome: 'Negócios'},
+                {id: 'montaria', nome: 'Montaria'}, {id: 'tradicao', nome: 'Tradição'},
+                {id: 'labuta', nome: 'Labuta'}, {id: 'exploracao', nome: 'Exploração'},
+                {id: 'roubo', nome: 'Roubo'}, {id: 'medicina', nome: 'Medicina'},
+                {id: 'tecnologia', nome: 'Tecnologia'}, {id: 'culinaria', nome: 'Culinária'},
+                {id: 'domestico', nome: 'Doméstico'}, {id: 'direcao', nome: 'Direção'}
+            ];
 
-        <div>
-            <div class="campo-antecedente">
-                <label>Roubo</label>
-                <div class="pips-row">
-                    <div class="pips-container" data-ant="roubo">
-                        <span class="pip" data-value="1"></span><span class="pip" data-value="2"></span><span class="pip" data-value="3"></span><span class="pip" data-value="4"></span><span class="pip" data-value="5"></span><span class="pip" data-value="6"></span>
+            // Gerador automático para não repetir código manual
+            antecedentes.forEach(ant => {
+                document.write(`
+                    <div class="campo-antecedente">
+                        <label>${ant.nome}</label>
+                        <div class="pips-row">
+                            <input type="number" id="${ant.id}Mod" class="modificador-input" value="0" title="Bônus/Ônus">
+                            <div class="pips-container" data-ant="${ant.id}">
+                                <span class="pip" data-value="1"></span>
+                                <span class="pip" data-value="2"></span>
+                                <span class="pip" data-value="3"></span>
+                                <span class="pip" data-value="4"></span>
+                                <span class="pip" data-value="5"></span>
+                                <span class="pip" data-value="6"></span>
+                            </div>
+                            <input type="hidden" id="${ant.id}" value="0">
+                            <button class="btn-dice" onclick="window.rolarDado('${ant.id}')">🎲</button>
+                        </div>
                     </div>
-                    <input type="hidden" id="roubo" value="0">
-                    <button class="btn-dice" onclick="rolarDado('roubo')">🎲</button>
-                </div>
-            </div>
-            <div class="campo-antecedente">
-                <label>Medicina</label>
-                <div class="pips-row">
-                    <div class="pips-container" data-ant="medicina">
-                        <span class="pip" data-value="1"></span><span class="pip" data-value="2"></span><span class="pip" data-value="3"></span><span class="pip" data-value="4"></span><span class="pip" data-value="5"></span><span class="pip" data-value="6"></span>
-                    </div>
-                    <input type="hidden" id="medicina" value="0">
-                    <button class="btn-dice" onclick="rolarDado('medicina')">🎲</button>
-                </div>
-            </div>
-            <div class="campo-antecedente">
-                <label>Tecnologia</label>
-                <div class="pips-row">
-                    <div class="pips-container" data-ant="tecnologia">
-                        <span class="pip" data-value="1"></span><span class="pip" data-value="2"></span><span class="pip" data-value="3"></span><span class="pip" data-value="4"></span><span class="pip" data-value="5"></span><span class="pip" data-value="6"></span>
-                    </div>
-                    <input type="hidden" id="tecnologia" value="0">
-                    <button class="btn-dice" onclick="rolarDado('tecnologia')">🎲</button>
-                </div>
-            </div>
-            <div class="campo-antecedente">
-                <label>Culinária</label>
-                <div class="pips-row">
-                    <div class="pips-container" data-ant="culinaria">
-                        <span class="pip" data-value="1"></span><span class="pip" data-value="2"></span><span class="pip" data-value="3"></span><span class="pip" data-value="4"></span><span class="pip" data-value="5"></span><span class="pip" data-value="6"></span>
-                    </div>
-                    <input type="hidden" id="culinaria" value="0">
-                    <button class="btn-dice" onclick="rolarDado('culinaria')">🎲</button>
-                </div>
-            </div>
-            <div class="campo-antecedente">
-                <label>Doméstico</label>
-                <div class="pips-row">
-                    <div class="pips-container" data-ant="domestico">
-                        <span class="pip" data-value="1"></span><span class="pip" data-value="2"></span><span class="pip" data-value="3"></span><span class="pip" data-value="4"></span><span class="pip" data-value="5"></span><span class="pip" data-value="6"></span>
-                    </div>
-                    <input type="hidden" id="domestico" value="0">
-                    <button class="btn-dice" onclick="rolarDado('domestico')">🎲</button>
-                </div>
-            </div>
-            <div class="campo-antecedente">
-                <label>Direção</label>
-                <div class="pips-row">
-                    <div class="pips-container" data-ant="direcao">
-                        <span class="pip" data-value="1"></span><span class="pip" data-value="2"></span><span class="pip" data-value="3"></span><span class="pip" data-value="4"></span><span class="pip" data-value="5"></span><span class="pip" data-value="6"></span>
-                    </div>
-                    <input type="hidden" id="direcao" value="0">
-                    <button class="btn-dice" onclick="rolarDado('direcao')">🎲</button>
-                </div>
-            </div>
-        </div>
+                `);
+            });
+        </script>
     </div>
 </div>
 
@@ -348,6 +255,10 @@
      <div id="inventarioMontariaContainer" class="lista-items"></div>
     </div>
    </div>
+  </div>
+
+  <div class="navigation-row" style="text-align: center; margin-top: 40px; padding-bottom: 40px;">
+    <button class="btn btn-base" onclick="irParaBase()">🏠 Ir para a Casa</button>
   </div>
 
   <script type="module" src="script.js"></script>

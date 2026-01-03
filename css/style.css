@@ -885,3 +885,58 @@ input[type="number"]::-webkit-outer-spin-button {
     font-size: 1em;
     min-width: 35px;
 }
+
+.modificador-input {
+    width: 42px !important;
+    height: 32px !important;
+    background: #0a0a0a !important;
+    border: 1px solid #5a4a3a !important;
+    color: #d4a574; /* Cor padrão */
+    font-family: 'Special Elite', monospace;
+    font-size: 0.9em !important;
+    text-align: center;
+    border-radius: 4px;
+    padding: 2px !important;
+}
+
+/* Destaque quando o mestre der bônus ou houver ônus */
+.modificador-input:not([value="0"]) {
+    border-color: #d4a574 !important;
+    color: #f5e6d3 !important;
+}
+
+/* Botão de Base */
+.btn-base {
+    background: linear-gradient(135deg, #3d2f24 0%, #1a1410 100%);
+    border-color: #8b6f47;
+    font-size: 1.2em;
+    padding: 15px 40px;
+}
+
+.btn-base:hover {
+    background: linear-gradient(135deg, #5a4a3a 0%, #2a1f1a 100%);
+    box-shadow: 0 0 20px rgba(139, 111, 71, 0.4);
+}
+
+/* Transição de Tela */
+.fade-exit {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.8s ease-in-out;
+}
+
+body {
+    transition: opacity 0.5s ease-in-out;
+}
+
+/* Remove setinhas apenas do input de Ocupação (Chrome/Safari/Edge) */
+#vagasUsadas::-webkit-outer-spin-button,
+#vagasUsadas::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Remove setinhas apenas do input de Ocupação (Firefox) */
+#vagasUsadas {
+    -moz-appearance: textfield;
+}

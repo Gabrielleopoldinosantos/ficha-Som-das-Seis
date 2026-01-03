@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Posto de Avanço - A Casa</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rye&family=Special+Elite&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* --- ESTILIZAÇÃO CARACTERÍSTICA DA BASE --- */
+        body { 
+            opacity: 0; 
+            transition: opacity 0.5s; 
+            background: #12100e;
+            background-image: 
+                radial-gradient(circle at 2px 2px, rgba(139, 111, 71, 0.05) 1px, transparent 0);
+            background-size: 30px 30px; /* Efeito de papel quadriculado de projeto */
+        }
+
+        h1 {
+            font-size: 5em;
+            color: #b8860b;
+            text-shadow: 4px 4px 0px #3d2f24, 0 0 30px rgba(184, 134, 11, 0.2);
+            margin-top: 10px;
+            letter-spacing: -2px;
+        }
+
+        /* Container que parece uma mesa de trabalho */
+        .container {
+            background: rgba(20, 18, 15, 0.95);
+            border: 10px double #3d2f24;
+            padding: 30px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            position: relative;
+        }
+
+
+        /* Seções estilo "Placas de Metal" */
+        .secao {
+            background: #1a1714;
+            border: 2px solid #4a3e35;
+            border-top: 15px solid #3d2f24; /* Cabeçalho mais grosso */
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.5);
+        }
+
+        .secao-header {
+            background: transparent;
+            color: #d4a574;
+            border-bottom: 1px solid #4a3e35;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+        }
+
+        /* Recursos Estilo "Livro de Contas" */
+        .recurso-item {
+            background: repeating-linear-gradient(90deg, #1d1a17, #1d1a17 20px, #211e1a 20px, #211e1a 40px);
+            border: 1px solid #2d261f;
+            padding: 10px 15px;
+            margin-bottom: 5px;
+            border-radius: 0;
+        }
+
+        .recurso-item label {
+            font-family: 'Special Elite';
+            color: #a09080;
+            text-shadow: 1px 1px 1px black;
+        }
+
+        .recurso-item input {
+            background: #000 !important;
+            border: 1px solid #b8860b !important;
+            color: #ffd700 !important; /* Dourado para recursos */
+            font-family: 'Special Elite';
+            border-radius: 0;
+        }
+
+        /* Tech-resources (Sucatas, etc) com brilho azulado de projeto */
+        .tech-resource {
+            border-right: 4px solid #4682b4;
+        }
+        .tech-resource input {
+            color: #87ceeb !important;
+            border-color: #4682b4 !important;
+        }
+
+        /* Status de Integridade */
+        .status-base-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #0f0e0d;
+            padding: 15px;
+            border: 1px dashed #5a4a3a;
+        }
+
+        #basePV, #basePVMax {
+            background: #220000 !important;
+            border: 2px solid #8b0000 !important;
+            color: #ff4444 !important;
+            width: 100px !important;
+            height: 60px !important;
+        }
+
+        /* Itens do Armazém */
+        .item-box {
+            background: #141210;
+            border: 1px solid #3d2f24;
+            border-left: 5px solid #b8860b;
+            margin-bottom: 8px;
+        }
+
+        .item-header input {
+            background: transparent !important;
+            border: none !important;
+            color: #d4a574 !important;
+            font-weight: bold;
+        }
+
+        /* Scrollbar temática */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1a1714; }
+        ::-webkit-scrollbar-thumb { background: #3d2f24; border: 1px solid #4a3e35; }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="btn btn-small btn-base-nav" onclick="window.location.href='index.html'">← VOLTAR PARA FICHA</button>
+
+        <h1>? ? ? ?</h1>
+
+        <div class="header-base">
+            <div class="secao" style="flex: 1;">
+                <div class="secao-header">ESTRUTURA</div>
+                <div class="status-base-container">
+                    <div class="status-inputs">
+                        <input type="number" id="basePV">
+                        <span class="status-separator">/</span>
+                        <input type="number" id="basePVMax">
+                    </div>
+                    <label style="margin-top:10px">PONTOS DE ESTRUTURA</label>
+                </div>
+                    <div style="text-align: center; padding: 20px; background: linear-gradient(180deg, #1a1714 0%, #221a14 100%); border-top: 1px solid #3d2f24; display: flex; flex-direction: column; align-items: center;">
+                        <label style="font-family: 'Special Elite'; color: #d4a574; font-size: 0.9em; letter-spacing: 1px; margin-bottom: 10px; text-shadow: 1px 1px 0px #000;">
+                             RESISTÊNCIA A DANO (RD)
+                        </label>
+                        <div style="position: relative; display: inline-block;">
+                            <div style="position: absolute; top: -5px; left: -5px; right: -5px; bottom: -5px; border: 1px solid #4a3e35; pointer-events: none;"></div>
+                            
+                            <input type="number" id="baseRD" 
+                                style="width: 100px; height: 50px; font-size: 2em; text-align: center; 
+                                    border: 2px solid #b8860b; background: #000; color: #fff; 
+                                    font-family: 'Special Elite'; box-shadow: inset 0 0 10px rgba(184, 134, 11, 0.3);
+                                    position: relative; z-index: 1;">
+                        </div>
+                    </div>
+            </div>
+
+<div class="secao" style="flex: 1.5; display: flex; flex-direction: column;">
+    <div class="secao-header">MODIFICAÇÕES DO POSTO</div>
+    
+    <textarea id="melhoriasLista" placeholder="Liste aqui: Defesas, Plantações, Fogueira santa..." 
+        style="flex-grow: 1; min-height: 120px; background: #0a0908 !important; color: #87ceeb; font-family: monospace; border: 1px solid #2d261f; padding: 10px; resize: none;">
+    </textarea>
+
+    <div style="text-align: center; padding: 15px; background: #1a1714; border-top: 1px solid #3d2f24; color: #4682b4; font-family: 'Special Elite';">
+        <span style="letter-spacing: 1px;">OCUPAÇÃO DO POSTO</span>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 5px;">
+            <input type="number" id="vagasUsadas" 
+    style="width: 60px; background: #000; border: 1px solid #4682b4; color: #87ceeb; font-weight: bold; font-size: 1.2em; text-align: center; font-family: 'Special Elite';">
+            <span style="font-size: 1.2em; color: #3d2f24;">/</span>
+            <span style="font-size: 1.2em; font-weight: bold;">? COMODOS</span>
+        </div>
+    </div>
+</div>
+        </div>
+
+        <div class="base-grid">
+            <div class="secao">
+                <div class="secao-header">LOGÍSTICA DE RECURSOS</div>
+                
+                <div class="recurso-item"><label>🍖 COMIDAS</label> <input type="number" id="resComida"></div>
+                <div class="recurso-item"><label>💧 ÁGUAS (TOTAL)</label> <input type="number" id="resAgua"></div>
+                <div class="recurso-item"><label>✨ ÁGUAS PURAS</label> <input type="number" id="resAguaPura"></div>
+                
+                <div style="margin: 15px 0; border-top: 1px dashed #4a3e35;"></div>
+
+                <div class="recurso-item tech-resource">
+                    <label>⛽ COMBUSTÍVEIS</label> 
+                    <input type="number" id="resCombustivel" step="0.5">
+                </div>
+                <div class="recurso-item tech-resource">
+                    <label>⚙️ SUCATAS</label> 
+                    <input type="number" id="resSucata" step="0.5">
+                </div>
+                <div class="recurso-item tech-resource">
+                    <label>📦 REC. COMUNS</label> 
+                    <input type="number" id="resComum" step="0.5">
+                </div>
+                <div class="recurso-item tech-resource">
+                    <label>💎 REC. RAROS</label> 
+                    <input type="number" id="resRaro" step="0.5">
+                </div>
+            </div>
+
+            <div class="secao">
+                <div class="secao-header">ARMAZÉM</div>
+                <div id="armazemContainer" style="max-height: 480px; overflow-y: auto;"></div>
+                <button class="btn btn-small" style="width: 100%; margin-top: 15px; border-radius: 0; background: #2d261f;" onclick="adicionarItemBase()">
+                    + REGISTRAR NOVO ITEM
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, onSnapshot, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCp5slzZKVuMQ5N86zv2vXbvMGEeNwem94",
+            authDomain: "sds-ficha.firebaseapp.com",
+            projectId: "sds-ficha",
+            storageBucket: "sds-ficha.firebasestorage.app",
+            messagingSenderId: "406558124782",
+            appId: "1:406558124782:web:e1f68e6693a57dde7ea1ff",
+            measurementId: "G-79SRX1P4D7"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const BASE_ID = "BASE_COLETIVA_UNICA";
+
+        // --- FUNÇÃO DE ESCONDER/APARECER ---
+        window.toggleDescricao = (btn) => {
+            const container = btn.closest('.item-box');
+            const txt = container.querySelector('textarea');
+            txt.style.display = (txt.style.display === 'none') ? 'block' : 'none';
+        };
+
+        // --- CARREGAMENTO ---
+        onSnapshot(doc(db, "bases", BASE_ID), (docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                
+                Object.keys(data).forEach(key => {
+                    const el = document.getElementById(key);
+                    if (el && key !== 'armazem') el.value = data[key];
+                });
+
+                const container = document.getElementById('armazemContainer');
+                const itensAtuais = Array.from(container.children);
+
+                // Atualiza o armazém mantendo a estrutura
+                container.innerHTML = '';
+                data.armazem?.forEach(item => {
+                    container.appendChild(criarEstruturaItem(item.nome, item.desc));
+                });
+            }
+            document.body.style.opacity = '1';
+        });
+
+        // --- SALVAMENTO ---
+        async function salvarBase() {
+            const baseData = {
+                basePV: document.getElementById('basePV').value,
+                basePVMax: document.getElementById('basePVMax').value,
+                baseRD: document.getElementById('baseRD').value,
+                melhoriasLista: document.getElementById('melhoriasLista').value,
+                vagasUsadas: document.getElementById('vagasUsadas').value,
+                resComida: document.getElementById('resComida').value,
+                resAgua: document.getElementById('resAgua').value,
+                resAguaPura: document.getElementById('resAguaPura').value,
+                resCombustivel: document.getElementById('resCombustivel').value,
+                resSucata: document.getElementById('resSucata').value,
+                resComum: document.getElementById('resComum').value,
+                resRaro: document.getElementById('resRaro').value,
+                armazem: Array.from(document.getElementById('armazemContainer').children).map(div => ({
+                    nome: div.querySelector('input').value,
+                    desc: div.querySelector('textarea').value
+                })),
+                updatedAt: serverTimestamp()
+            };
+            await setDoc(doc(db, "bases", BASE_ID), baseData);
+        }
+
+        window.adicionarItemBase = () => {
+            document.getElementById('armazemContainer').appendChild(criarEstruturaItem('', ''));
+        };
+
+        function criarEstruturaItem(nome, desc) {
+            const div = document.createElement('div');
+            div.className = 'item-box';
+            div.innerHTML = `
+                <div class="item-header">
+                    <input type="text" value="${nome}" placeholder="Nome do Item...">
+                    <button class="btn btn-small" onclick="window.toggleDescricao(this)">📝</button>
+                    <button class="btn btn-small btn-danger" onclick="this.parentElement.parentElement.remove(); window.triggerSalvar()">🗑️</button>
+                </div>
+                <textarea placeholder="Detalhes e propriedades..." style="display: ${desc ? 'block' : 'none'};">${desc}</textarea>
+            `;
+            return div;
+        }
+
+        let timeout;
+        window.triggerSalvar = () => {
+            clearTimeout(timeout);
+            timeout = setTimeout(salvarBase, 1000);
+        };
+
+        document.addEventListener('input', window.triggerSalvar);
+    </script>
+</body>
+</html> 
