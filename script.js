@@ -49,16 +49,25 @@ function atualizarPipsVisual(container, valor) {
 // --- SALVAMENTO ---
 async function salvarFichaFirebase() {
     const nomePersonagem = document.getElementById('nome').value.trim();
-    if (!nomePersonagem) return;
+    const senha = document.getElementById('senha').value.trim().toUpperCase(); // Força maiúsculas
+
+    if (!nomePersonagem || !senha) {
+        // Não alerta no auto-save para não irritar o jogador, 
+        // mas o console avisa que falta dados.
+        console.warn("Nome ou Senha ausentes. Não foi possível salvar.");
+        return;
+    }
 
     if (!idFichaAtual) {
-        idFichaAtual = nomePersonagem.replace(/\s+/g, '_') + "_" + Date.now();
+        // O ID agora pode ser baseado no Nome para facilitar buscas
+        idFichaAtual = nomePersonagem.replace(/\s+/g, '_').toUpperCase();
         localStorage.setItem('idFichaAtual', idFichaAtual);
     }
 
     const ficha = {
         id: idFichaAtual,
         nome: nomePersonagem,
+        senha: senha,
         nivel: document.getElementById('nivel').value,
         dinheiro: document.getElementById('dinheiro').value,
         fisico: document.getElementById('fisico').value,
@@ -103,7 +112,7 @@ async function salvarFichaFirebase() {
         ultimaAtualizacao: serverTimestamp()
     };
 
-    try {
+try {
         await setDoc(doc(db, "fichas", idFichaAtual), ficha);
         console.log("Sincronizado com Firebase!");
     } catch (e) { console.error("Erro ao salvar:", e); }
@@ -257,6 +266,9 @@ window.toggleDescricao = (btn) => {
 
 let timeoutSalvar = null;
 function autoSalvar() {
+    const senha = document.getElementById('senha').value.trim();
+    if (!senha) return; // Não salva se não tiver senha definida
+
     clearTimeout(timeoutSalvar);
     timeoutSalvar = setTimeout(() => salvarFichaFirebase(), 1500); 
 }
@@ -313,15 +325,39 @@ window.addEventListener('load', async () => {
 
 // Exportações para o HTML
 window.salvarFicha = salvarFichaFirebase;
+// --- CARREGAMENTO APENAS PELA SENHA ---
 window.carregarFichaManual = async () => {
-    const nomeBusca = prompt("Digite o nome exato do personagem:");
-    if (!nomeBusca) return;
-    const q = query(collection(db, "fichas"), where("nome", "==", nomeBusca));
-    const querySnapshot = await getDocs(q);
-    if (!querySnapshot.empty) preencherCampos(querySnapshot.docs[0].data());
-    else alert("Não encontrado.");
-};
+    const senhaDigitada = document.getElementById('senha').value.trim().toUpperCase();
 
+    if (!senhaDigitada) {
+        alert("Digite sua senha no campo 'Código de Acesso' para carregar.");
+        return;
+    }
+
+    try {
+        // Busca na coleção "fichas" onde o campo "senha" é igual à senha digitada
+        const fichasRef = collection(db, "fichas");
+        const q = query(fichasRef, where("senha", "==", senhaDigitada));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+            // Pega o primeiro documento encontrado com essa senha
+            const dadosFicha = querySnapshot.docs[0].data();
+            preencherCampos(dadosFicha);
+            
+            // Atualiza o ID atual no localStorage para manter a sessão
+            idFichaAtual = querySnapshot.docs[0].id;
+            localStorage.setItem('idFichaAtual', idFichaAtual);
+            
+            alert(`Ficha de ${dadosFicha.nome} carregada!`);
+        } else {
+            alert("Nenhuma ficha encontrada com esta senha.");
+        }
+    } catch (e) {
+        console.error("Erro ao carregar:", e);
+        alert("Erro ao acessar o banco de dados.");
+    }
+};
 window.rolarDanoMontaria = function() {
     const resultadoDado = Math.floor(Math.random() * 6) + 1;
     const potencia = parseInt(document.getElementById('montariaPotencia').value) || 0;
