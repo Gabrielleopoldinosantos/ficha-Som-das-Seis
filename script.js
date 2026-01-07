@@ -32,7 +32,9 @@ function configurarPips() {
                 
                 hiddenInput.value = novoValor;
                 atualizarPipsVisual(container, novoValor);
-                // REMOVIDO: autoSalvar(); <-- Não salva mais ao clicar nos pips
+                
+                // REATIVADO: Salva automaticamente ao mudar a bolinha
+                autoSalvar(); 
             });
         });
     });
@@ -47,18 +49,15 @@ function atualizarPipsVisual(container, valor) {
 }
 
 // --- SALVAMENTO ---
-// No seu script.js, substitua a função salvarFichaFirebase por esta versão atualizada:
-
 async function salvarFichaFirebase() {
     const nomePersonagem = document.getElementById('nome').value.trim();
     const senha = document.getElementById('senha').value.trim().toUpperCase();
 
     if (!nomePersonagem || !senha) {
-        alert("Para salvar manualmente, preencha o Nome e a Senha.");
+        console.warn("Nome ou Senha ausentes. Não foi possível salvar.");
         return;
     }
 
-    // Define o ID da ficha baseado no nome (se ainda não existir)
     if (!idFichaAtual) {
         idFichaAtual = nomePersonagem.replace(/\s+/g, '_').toUpperCase();
         localStorage.setItem('idFichaAtual', idFichaAtual);
@@ -85,61 +84,49 @@ async function salvarFichaFirebase() {
         recompensas: document.getElementById('recompensas').value,
         valorRecompensa: document.getElementById('valorRecompensa').value,
         honraValor: document.getElementById('honraValor').value,
-        
-        // Antecedentes (Salvando agora apenas aqui)
+        // Antecedentes
+combate: document.getElementById('combate').value,
         combateMod: document.getElementById('combateMod').value,
-        combate: document.getElementById('combate').value, // O valor oculto dos pips
-        negociosMod: document.getElementById('negociosMod').value,
         negocios: document.getElementById('negocios').value,
-        montariaMod: document.getElementById('montariaMod').value,
+        negociosMod: document.getElementById('negociosMod').value,
         montaria: document.getElementById('montaria').value,
-        tradicaoMod: document.getElementById('tradicaoMod').value,
+        montariaMod: document.getElementById('montariaMod').value,
         tradicao: document.getElementById('tradicao').value,
-        labutaMod: document.getElementById('labutaMod').value,
+        tradicaoMod: document.getElementById('tradicaoMod').value,
         labuta: document.getElementById('labuta').value,
-        exploracaoMod: document.getElementById('exploracaoMod').value,
+        labutaMod: document.getElementById('labutaMod').value,
         exploracao: document.getElementById('exploracao').value,
-        rouboMod: document.getElementById('rouboMod').value,
+        exploracaoMod: document.getElementById('exploracaoMod').value,
         roubo: document.getElementById('roubo').value,
-        medicinaMod: document.getElementById('medicinaMod').value,
+        rouboMod: document.getElementById('rouboMod').value,
         medicina: document.getElementById('medicina').value,
-        tecnologiaMod: document.getElementById('tecnologiaMod').value,
+        medicinaMod: document.getElementById('medicinaMod').value,
         tecnologia: document.getElementById('tecnologia').value,
-        culinariaMod: document.getElementById('culinariaMod').value,
+        tecnologiaMod: document.getElementById('tecnologiaMod').value,
         culinaria: document.getElementById('culinaria').value,
-        domesticoMod: document.getElementById('domesticoMod').value,
+        culinariaMod: document.getElementById('culinariaMod').value,
         domestico: document.getElementById('domestico').value,
-        direcaoMod: document.getElementById('direcaoMod').value,
+        domesticoMod: document.getElementById('domesticoMod').value,
         direcao: document.getElementById('direcao').value,
-
-        // Montaria e Listas
+        direcaoMod: document.getElementById('direcaoMod').value,
+        // Montaria
         montariaNome: document.getElementById('montariaNome').value,
         montariaPV: document.getElementById('montariaPV').value,
         montariaPVMax: document.getElementById('montariaPVMax').value,
         montariaDanoBonus: document.getElementById('montariaDanoBonus').value,
         montariaPotencia: document.getElementById('montariaPotencia').value,
         montariaResistencia: document.getElementById('montariaResistencia').value,
+        // Listas
         habilidades: extrairLista('habilidadesContainer'),
         inventario: extrairLista('inventarioContainer'),
         inventarioMontaria: extrairLista('inventarioMontariaContainer'),
         ultimaAtualizacao: serverTimestamp()
     };
 
-    try {
+try {
         await setDoc(doc(db, "fichas", idFichaAtual), ficha);
-        console.log("Ficha Completa Salva com Sucesso!");
-        
-        // Feedback visual rápido no botão se não for auto-save
-        const btnSalvar = document.querySelector('button[onclick="salvarFicha()"]');
-        if(btnSalvar) {
-            const originalText = btnSalvar.innerText;
-            btnSalvar.innerText = "✅ Salvo!";
-            setTimeout(() => btnSalvar.innerText = originalText, 2000);
-        }
-    } catch (e) { 
-        console.error("Erro ao salvar:", e); 
-        alert("Erro ao salvar no banco de dados.");
-    }
+        console.log("Sincronizado!");
+    } catch (e) { console.error("Erro ao salvar:", e); }
 }
 
 // --- CARREGAMENTO ---
@@ -338,12 +325,9 @@ window.addEventListener('load', async () => {
         if (s.exists()) preencherCampos(s.data());
     }
 
-    // Modificado para ignorar o campo 'senha'
     document.querySelectorAll('input, textarea, select').forEach(input => {
-        if (input.id !== 'senha') { // Pula o campo de senha
-            input.addEventListener('input', autoSalvar);
-            input.addEventListener('change', autoSalvar);
-        }
+        input.addEventListener('input', autoSalvar);
+        input.addEventListener('change', autoSalvar);
     });
 
     window.calcularValores();
