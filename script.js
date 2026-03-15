@@ -69,7 +69,7 @@ function atualizarMediasVisuais() {
 
         const bonusAtk  = parseInt(bonusAtkEl?.value) || 0;
         const mediaAtk  = calcularMedia('combate') + bonusAtk;
-        mediaAtkEl.textContent = mediaAtk;
+        mediaAtkEl.textContent = ' ' + mediaAtk;
 
         const danoBase  = danoParaMedia(danoSel?.value || '0');
         const bonusDano = parseInt(bonusDanoEl?.value) || 0;
@@ -84,7 +84,7 @@ window.toggleCombateDinamico = function() {
 
     const btn = document.getElementById('btnCombateDinamico');
     if (btn) {
-        btn.textContent = modoDinamico ? 'COMBATE NORMAL' : ' COMBATE DINÂMICO';
+        btn.textContent = modoDinamico ? 'COMBATE NORMAL' : 'COMBATE DINÂMICO';
     }
 
     if (modoDinamico) atualizarMediasVisuais();
@@ -138,7 +138,7 @@ function criarEstruturaAtaque(nome = '', bonusAtk = 0, dano = '0', bonusDano = 0
           <span class="ataque-col-label">Ataque</span>
           <div class="ataque-controls">
             <input type="number" class="atk-bonus" value="${bonusAtk}" title="Bônus/ônus no ataque">
-            <button class="atk-btn-rolar-atk" onclick="window.rolarAtaque(this)">🎲 ATQ</button>
+            <button class="atk-btn-rolar-atk" onclick="window.rolarAtaque(this)">🎲 ATK</button>
           </div>
           <span class="atk-media-atk">—</span>
         </div>
@@ -192,7 +192,7 @@ window.rolarAtaque = function(btn) {
 
     const nomeAtaque = box.querySelector('input[type="text"]')?.value || 'Ataque';
     mostrarResultadoDado(dado, totalBonus, total);
-    registrarRolagemNoFirebase('' + nomeAtaque, dado, totalBonus, total);
+    registrarRolagemNoFirebase(' ' + nomeAtaque, dado, totalBonus, total);
 };
 
 // Rola dano de ataque
@@ -489,7 +489,7 @@ window.adicionarHabilidade = function() {
     div.innerHTML = `
         <input type="text" placeholder="Habilidade">
         <textarea placeholder="Descrição..."></textarea>
-        <button class="btn btn-small btn-danger" onclick="this.parentElement.remove()">Remover</button>`;
+        <button class="btn btn-small btn-danger" onclick="this.parentElement.remove(); window.triggerSalvar()">Remover</button>`;
     document.getElementById('habilidadesContainer').appendChild(div);
 };
 
@@ -500,7 +500,7 @@ function adicionarEstruturaItem(container, placeholder) {
         <div class="item-header">
             <input type="text" placeholder="${placeholder}">
             <button class="btn btn-small" onclick="window.toggleDescricao(this)">📝</button>
-            <button class="btn btn-small btn-danger" onclick="this.parentElement.parentElement.remove()">🗑️</button>
+            <button class="btn btn-small btn-danger" onclick="this.parentElement.parentElement.remove(); window.triggerSalvar()">🗑️</button>
         </div>
         <textarea placeholder="Descrição..." style="display:none;"></textarea>`;
     container.appendChild(div);
@@ -546,9 +546,19 @@ window.addEventListener('load', async () => {
         if (s.exists()) preencherCampos(s.data());
     }
 
-    document.querySelectorAll('input, textarea, select').forEach(el => {
-        el.addEventListener('input',  () => { if (modoDinamico) atualizarMediasVisuais(); autoSalvar(); });
-        el.addEventListener('change', () => { if (modoDinamico) atualizarMediasVisuais(); autoSalvar(); });
+    // Event delegation — captura input/change de QUALQUER elemento,
+    // inclusive itens, habilidades e ataques criados dinamicamente
+    document.addEventListener('input',  e => {
+        if (e.target.matches('input, textarea, select')) {
+            if (modoDinamico) atualizarMediasVisuais();
+            autoSalvar();
+        }
+    });
+    document.addEventListener('change', e => {
+        if (e.target.matches('input, textarea, select')) {
+            if (modoDinamico) atualizarMediasVisuais();
+            autoSalvar();
+        }
     });
 
     calcularValores();

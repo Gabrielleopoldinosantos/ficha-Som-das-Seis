@@ -789,10 +789,7 @@
 
 
 
-/* Garante que as setas (spinners) apareçam nos campos numéricos */
-input[type="number"] {
-    -moz-appearance: textfield; /* Firefox */
-}
+
 
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
@@ -942,7 +939,3 @@ body {
     margin: 0;
 }
 
-/* Remove setinhas apenas do input de Ocupação (Firefox) */
-#vagasUsadas {
-    -moz-appearance: textfield;
-}
