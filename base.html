@@ -7,14 +7,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Rye&family=Special+Elite&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <style>
-        /* --- ESTILIZAÇÃO CARACTERÍSTICA DA BASE --- */
         body { 
             opacity: 0; 
             transition: opacity 0.5s; 
             background: #12100e;
             background-image: 
                 radial-gradient(circle at 2px 2px, rgba(139, 111, 71, 0.05) 1px, transparent 0);
-            background-size: 30px 30px; /* Efeito de papel quadriculado de projeto */
+            background-size: 30px 30px;
         }
 
         h1 {
@@ -25,7 +24,6 @@
             letter-spacing: -2px;
         }
 
-        /* Container que parece uma mesa de trabalho */
         .container {
             background: rgba(20, 18, 15, 0.95);
             border: 10px double #3d2f24;
@@ -34,12 +32,10 @@
             position: relative;
         }
 
-
-        /* Seções estilo "Placas de Metal" */
         .secao {
             background: #1a1714;
             border: 2px solid #4a3e35;
-            border-top: 15px solid #3d2f24; /* Cabeçalho mais grosso */
+            border-top: 15px solid #3d2f24;
             box-shadow: 5px 5px 15px rgba(0,0,0,0.5);
         }
 
@@ -52,7 +48,6 @@
             margin-bottom: 20px;
         }
 
-        /* Recursos Estilo "Livro de Contas" */
         .recurso-item {
             background: repeating-linear-gradient(90deg, #1d1a17, #1d1a17 20px, #211e1a 20px, #211e1a 40px);
             border: 1px solid #2d261f;
@@ -70,12 +65,11 @@
         .recurso-item input {
             background: #000 !important;
             border: 1px solid #b8860b !important;
-            color: #ffd700 !important; /* Dourado para recursos */
+            color: #ffd700 !important;
             font-family: 'Special Elite';
             border-radius: 0;
         }
 
-        /* Tech-resources (Sucatas, etc) com brilho azulado de projeto */
         .tech-resource {
             border-right: 4px solid #4682b4;
         }
@@ -84,7 +78,6 @@
             border-color: #4682b4 !important;
         }
 
-        /* Status de Integridade */
         .status-base-container {
             display: flex;
             flex-direction: column;
@@ -102,7 +95,6 @@
             height: 60px !important;
         }
 
-        /* Itens do Armazém */
         .item-box {
             background: #141210;
             border: 1px solid #3d2f24;
@@ -117,11 +109,9 @@
             font-weight: bold;
         }
 
-        /* Scrollbar temática */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #1a1714; }
         ::-webkit-scrollbar-thumb { background: #3d2f24; border: 1px solid #4a3e35; }
-
     </style>
 </head>
 <body>
@@ -141,39 +131,38 @@
                     </div>
                     <label style="margin-top:10px">CONDIÇÃO DA ESTRUTURA</label>
                 </div>
-                    <div style="text-align: center; padding: 20px; background: linear-gradient(180deg, #1a1714 0%, #221a14 100%); border-top: 1px solid #3d2f24; display: flex; flex-direction: column; align-items: center;">
-                        <label style="font-family: 'Special Elite'; color: #d4a574; font-size: 0.9em; letter-spacing: 1px; margin-bottom: 10px; text-shadow: 1px 1px 0px #000;">
-                             RESISTÊNCIA A DANO (RD)
-                        </label>
-                        <div style="position: relative; display: inline-block;">
-                            <div style="position: absolute; top: -5px; left: -5px; right: -5px; bottom: -5px; border: 1px solid #4a3e35; pointer-events: none;"></div>
-                            
-                            <input type="number" id="baseRD" 
-                                style="width: 100px; height: 50px; font-size: 2em; text-align: center; 
-                                    border: 2px solid #b8860b; background: #000; color: #fff; 
-                                    font-family: 'Special Elite'; box-shadow: inset 0 0 10px rgba(184, 134, 11, 0.3);
-                                    position: relative; z-index: 1;">
-                        </div>
+                <div style="text-align: center; padding: 20px; background: linear-gradient(180deg, #1a1714 0%, #221a14 100%); border-top: 1px solid #3d2f24; display: flex; flex-direction: column; align-items: center;">
+                    <label style="font-family: 'Special Elite'; color: #d4a574; font-size: 0.9em; letter-spacing: 1px; margin-bottom: 10px; text-shadow: 1px 1px 0px #000;">
+                         RESISTÊNCIA A DANO (RD)
+                    </label>
+                    <div style="position: relative; display: inline-block;">
+                        <div style="position: absolute; top: -5px; left: -5px; right: -5px; bottom: -5px; border: 1px solid #4a3e35; pointer-events: none;"></div>
+                        <input type="number" id="baseRD" 
+                            style="width: 100px; height: 50px; font-size: 2em; text-align: center; 
+                                border: 2px solid #b8860b; background: #000; color: #fff; 
+                                font-family: 'Special Elite'; box-shadow: inset 0 0 10px rgba(184, 134, 11, 0.3);
+                                position: relative; z-index: 1;">
                     </div>
+                </div>
             </div>
 
-<div class="secao" style="flex: 1.5; display: flex; flex-direction: column;">
-    <div class="secao-header">MODIFICAÇÕES DA BASE</div>
-    
-    <textarea id="melhoriasLista" placeholder="Liste aqui: Defesas, Plantações, Fogueira santa..." 
-        style="flex-grow: 1; min-height: 120px; background: #0a0908 !important; color: #87ceeb; font-family: monospace; border: 1px solid #2d261f; padding: 10px; resize: none;">
-    </textarea>
+            <div class="secao" style="flex: 1.5; display: flex; flex-direction: column;">
+                <div class="secao-header">MODIFICAÇÕES DA BASE</div>
+                
+                <textarea id="melhoriasLista" placeholder="Liste aqui: Defesas, Plantações, Fogueira santa..." 
+                    style="flex-grow: 1; min-height: 120px; background: #0a0908 !important; color: #87ceeb; font-family: monospace; border: 1px solid #2d261f; padding: 10px; resize: none;">
+                </textarea>
 
-    <div style="text-align: center; padding: 15px; background: #1a1714; border-top: 1px solid #3d2f24; color: #4682b4; font-family: 'Special Elite';">
-        <span style="letter-spacing: 1px;">OCUPAÇÃO DA BASE</span>
-        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 5px;">
-            <input type="number" id="vagasUsadas" 
-    style="width: 60px; background: #000; border: 1px solid #4682b4; color: #87ceeb; font-weight: bold; font-size: 1.2em; text-align: center; font-family: 'Special Elite';">
-            <span style="font-size: 1.2em; color: #3d2f24;">/</span>
-            <span style="font-size: 1.2em; font-weight: bold;">? COMODOS</span>
-        </div>
-    </div>
-</div>
+                <div style="text-align: center; padding: 15px; background: #1a1714; border-top: 1px solid #3d2f24; color: #4682b4; font-family: 'Special Elite';">
+                    <span style="letter-spacing: 1px;">OCUPAÇÃO DA BASE</span>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 5px;">
+                        <input type="number" id="vagasUsadas" 
+                            style="width: 60px; background: #000; border: 1px solid #4682b4; color: #87ceeb; font-weight: bold; font-size: 1.2em; text-align: center; font-family: 'Special Elite';">
+                        <span style="font-size: 1.2em; color: #3d2f24;">/</span>
+                        <span style="font-size: 1.2em; font-weight: bold;">? MELHORIAS</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="base-grid">
@@ -182,7 +171,6 @@
                 
                 <div class="recurso-item"><label>🍖 COMIDAS</label> <input type="number" id="resComida"></div>
                 <div class="recurso-item"><label>💧 ÁGUAS (TOTAL)</label> <input type="number" id="resAgua"></div>
-                <div class="recurso-item"><label>✨ ÁGUAS PURAS</label> <input type="number" id="resAguaPura"></div>
                 
                 <div style="margin: 15px 0; border-top: 1px dashed #4a3e35;"></div>
 
@@ -195,11 +183,7 @@
                     <input type="number" id="resSucata" step="0.5">
                 </div>
                 <div class="recurso-item tech-resource">
-                    <label>📦 REC. COMUNS</label> 
-                    <input type="number" id="resComum" step="0.5">
-                </div>
-                <div class="recurso-item tech-resource">
-                    <label>💎 REC. RAROS</label> 
+                    <label>📦 MANTIMENTOS</label> 
                     <input type="number" id="resRaro" step="0.5">
                 </div>
             </div>
@@ -232,27 +216,21 @@
         const db = getFirestore(app);
         const BASE_ID = "BASE_COLETIVA_UNICA";
 
-        // --- FUNÇÃO DE ESCONDER/APARECER ---
         window.toggleDescricao = (btn) => {
             const container = btn.closest('.item-box');
             const txt = container.querySelector('textarea');
             txt.style.display = (txt.style.display === 'none') ? 'block' : 'none';
         };
 
-        // --- CARREGAMENTO ---
         onSnapshot(doc(db, "bases", BASE_ID), (docSnap) => {
             if (docSnap.exists()) {
                 const data = docSnap.data();
-                
                 Object.keys(data).forEach(key => {
                     const el = document.getElementById(key);
                     if (el && key !== 'armazem') el.value = data[key];
                 });
 
                 const container = document.getElementById('armazemContainer');
-                const itensAtuais = Array.from(container.children);
-
-                // Atualiza o armazém mantendo a estrutura
                 container.innerHTML = '';
                 data.armazem?.forEach(item => {
                     container.appendChild(criarEstruturaItem(item.nome, item.desc));
@@ -261,7 +239,6 @@
             document.body.style.opacity = '1';
         });
 
-        // --- SALVAMENTO ---
         async function salvarBase() {
             const baseData = {
                 basePV: document.getElementById('basePV').value,
@@ -271,10 +248,8 @@
                 vagasUsadas: document.getElementById('vagasUsadas').value,
                 resComida: document.getElementById('resComida').value,
                 resAgua: document.getElementById('resAgua').value,
-                resAguaPura: document.getElementById('resAguaPura').value,
                 resCombustivel: document.getElementById('resCombustivel').value,
                 resSucata: document.getElementById('resSucata').value,
-                resComum: document.getElementById('resComum').value,
                 resRaro: document.getElementById('resRaro').value,
                 armazem: Array.from(document.getElementById('armazemContainer').children).map(div => ({
                     nome: div.querySelector('input').value,
@@ -312,4 +287,4 @@
         document.addEventListener('input', window.triggerSalvar);
     </script>
 </body>
-</html> 
+</html>

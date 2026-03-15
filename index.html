@@ -6,6 +6,265 @@
  <title>O Som das Seis - Ficha de Personagem</title>
  <link href="https://fonts.googleapis.com/css2?family=Rye&family=Special+Elite&display=swap" rel="stylesheet">
  <link rel="stylesheet" href="css/style.css">
+ <style>
+  /* ── COMBATE DINÂMICO ── */
+  .media-badge {
+    display: none;
+    background: #1a1410;
+    border: 2px solid #b8860b;
+    color: #ffd700;
+    font-family: 'Special Elite', monospace;
+    font-size: 1.1em;
+    font-weight: bold;
+    padding: 4px 10px;
+    border-radius: 4px;
+    min-width: 38px;
+    text-align: center;
+    box-shadow: 0 0 6px rgba(184,134,11,0.25);
+  }
+  body.combate-dinamico .media-badge { display: inline-block; }
+  body.combate-dinamico .btn-dice-normal { display: none !important; }
+  body.combate-dinamico #acoesBox { display: none !important; }
+  /* quando ações some, defesa e iniciativa ficam 2 colunas, centralizadas */
+  body.combate-dinamico .combate-grid { grid-template-columns: 1fr 1fr !important; }
+  body.combate-dinamico #defesaBox,
+  body.combate-dinamico #iniciativaBox {
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  body.combate-dinamico #defesaBox .combate-valor { font-size: 2.6em; }
+  body.combate-dinamico #iniciativaBox .combate-valor { display: none; }
+  body.combate-dinamico #iniciativaBox .ini-bonus-wrap { display: none; }
+  body.combate-dinamico #iniciativaBox .ini-dinamico { display: flex !important; }
+
+  .ini-dinamico {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    width: 100%;
+    margin-top: 0;
+    padding: 10px 0 4px;
+  }
+  .ini-dinamico .ini-valor {
+    font-size: 2.2em;
+    color: #d4a574;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    line-height: 1;
+  }
+  .ini-dinamico .ini-label {
+    font-size: 0.68em;
+    color: #8b6f47;
+    letter-spacing: 1px;
+    margin-top: 5px;
+  }
+
+  /* ataque dinâmico */
+  body.combate-dinamico .atk-btn-rolar-atk  { display: none !important; }
+  body.combate-dinamico .atk-btn-rolar-dano { display: none !important; }
+  body.combate-dinamico .atk-media-atk  { display: inline-flex !important; }
+  body.combate-dinamico .atk-media-dano { display: inline-flex !important; }
+  .atk-media-atk, .atk-media-dano {
+    display: none;
+    align-items: center;
+    gap: 4px;
+    background: #1a1410;
+    border: 1px solid #b8860b;
+    color: #ffd700;
+    font-family: 'Special Elite', monospace;
+    font-size: 0.85em;
+    padding: 3px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+  .atk-media-dano { border-color: #4682b4; color: #87ceeb; }
+
+  /* ── ATAQUES ── */
+  .ataque-box {
+    background: #0f0d0b;
+    border: 1px solid #3d2f24;
+    margin-bottom: 14px;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.5);
+  }
+  .ataque-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(90deg, #2a1a10 0%, #1a1208 100%);
+    border-bottom: 2px solid #7a1a1a;
+    padding: 9px 12px;
+  }
+  .ataque-header input[type="text"] {
+    flex: 1;
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 1px dashed #5a3a2a !important;
+    border-radius: 0 !important;
+    color: #e8b87a !important;
+    font-weight: bold;
+    font-size: 1.05em !important;
+    padding: 2px 4px !important;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .ataque-header input[type="text"]::placeholder { color: #5a4030; letter-spacing: 1px; }
+  /* Grid: ATK à esq, divisor, DANO à dir */
+  .ataque-corpo {
+    display: grid;
+    grid-template-columns: 1fr 1px 1fr;
+  }
+  .ataque-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 12px;
+  }
+  .ataque-col-sep { background: #2a2018; }
+  /* rótulo da coluna */
+  .ataque-col-label {
+    font-family: 'Rye', cursive;
+    font-size: 0.65em;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+  .col-atk .ataque-col-label  { color: #b8860b; }
+  .col-dano .ataque-col-label { color: #4682b4; }
+  /* linha de controles (input + botão lado a lado) */
+  .ataque-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    justify-content: center;
+  }
+  /* inputs de bônus */
+  .atk-bonus, .atk-dano-bonus {
+    width: 56px !important;
+    height: 34px !important;
+    font-size: 1em !important;
+    padding: 0 4px !important;
+    background: #050403 !important;
+    text-align: center;
+    border-radius: 3px;
+  }
+  .atk-bonus      { border: 1px solid #7a5a20 !important; color: #d4a574 !important; }
+  .atk-dano-bonus { border: 1px solid #2a5a8a !important; color: #87ceeb !important; }
+  /* dropdown */
+  .ataque-dano-select {
+    background: #050403;
+    border: 1px solid #2a5a8a;
+    color: #87ceeb;
+    font-family: 'Special Elite', monospace;
+    font-size: 1em;
+    padding: 5px 8px;
+    border-radius: 3px;
+    cursor: pointer;
+    width: 74px;
+    text-align: center;
+  }
+  .ataque-dano-select:focus { outline: none; border-color: #5a9aca; }
+  /* botões de rolar */
+  .atk-btn-rolar-atk {
+    background: linear-gradient(160deg, #5a3a10 0%, #2a1a08 100%);
+    color: #e8c07a;
+    border: 1px solid #b8860b;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Special Elite', monospace;
+    font-size: 0.82em;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .atk-btn-rolar-atk:hover {
+    background: linear-gradient(160deg, #7a5a20 0%, #3a2a10 100%);
+    box-shadow: 0 0 8px rgba(184,134,11,0.5);
+  }
+  .atk-btn-rolar-dano {
+    background: linear-gradient(160deg, #0a2040 0%, #051020 100%);
+    color: #87ceeb;
+    border: 1px solid #4682b4;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Special Elite', monospace;
+    font-size: 0.82em;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .atk-btn-rolar-dano:hover {
+    background: linear-gradient(160deg, #142850 0%, #0a1a2a 100%);
+    box-shadow: 0 0 8px rgba(70,130,180,0.5);
+  }
+  /* badges modo dinâmico */
+  .atk-media-atk, .atk-media-dano {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Rye', cursive;
+    font-size: 1.8em;
+    padding: 4px 10px;
+    border-radius: 4px;
+    min-width: 56px;
+    text-align: center;
+  }
+  .atk-media-atk  { color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.4); }
+  .atk-media-dano { color: #87ceeb; text-shadow: 0 0 10px rgba(135,206,235,0.4); }
+
+  /* botão combate dinâmico */
+  .btn-combate-dinamico {
+    width: 100%;
+    margin-top: 12px;
+    background: linear-gradient(135deg, #1a2a1a 0%, #0f1a0f 100%);
+    border: 2px solid #4a7a4a;
+    color: #7abf7a;
+    font-family: 'Special Elite', monospace;
+    font-size: 0.85em;
+    letter-spacing: 1px;
+    padding: 8px;
+    cursor: pointer;
+    border-radius: 4px;
+    text-transform: uppercase;
+    transition: all 0.3s;
+  }
+  .btn-combate-dinamico:hover {
+    background: linear-gradient(135deg, #223322 0%, #162016 100%);
+    box-shadow: 0 0 12px rgba(74,122,74,0.4);
+  }
+  body.combate-dinamico .btn-combate-dinamico {
+    background: linear-gradient(135deg, #2a1a0a 0%, #1a0f05 100%);
+    border-color: #b8860b;
+    color: #ffd700;
+  }
+
+  /* ── ANIMAÇÕES POPUP ── */
+  @keyframes diceIn {
+    from { opacity: 0; transform: translate(-50%,-50%) scale(0.6) rotate(-15deg); }
+    to   { opacity: 1; transform: translate(-50%,-50%) scale(1) rotate(0deg); }
+  }
+  @keyframes diceOut {
+    from { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+    to   { opacity: 0; transform: translate(-50%,-50%) scale(0.6); }
+  }
+  /* sobrescreve as animações de crítico também */
+  @keyframes diceRollSuccess {
+    from { opacity: 0; transform: translate(-50%,-50%) scale(0.6) rotate(-10deg); }
+    to   { opacity: 1; transform: translate(-50%,-50%) scale(1) rotate(0deg); }
+  }
+  @keyframes diceRollFailure {
+    from { opacity: 0; transform: translate(-50%,-50%) scale(0.6) rotate(10deg); }
+    to   { opacity: 1; transform: translate(-50%,-50%) scale(1) rotate(0deg); }
+  }
+ </style>
 </head>
 <body>
  <div class="container">
@@ -18,64 +277,71 @@
   </div>
 
   <div class="ficha-grid">
-      <div class="secao secao-ampla">
+
+   <!-- INFORMAÇÕES -->
+   <div class="secao secao-ampla">
     <div class="secao-header">Informações do Personagem</div>
-<div class="campo">
-    <label>CÓDIGO DE ACESSO (SENHA ÚNICA)</label>
-    <input type="text" id="senha" placeholder="USE UMA SENHA ÚNICA" style="text-transform: uppercase; font-weight: bold; color: #d4a574;">
-    <small style="color: #8b6f47; font-size: 0.7em;">* Guarde esta senha, ela é a única forma de recuperar sua ficha.</small>
-</div>
+    <div class="campo">
+     <label>CÓDIGO DE ACESSO (SENHA ÚNICA)</label>
+     <input type="text" id="senha" placeholder="USE UMA SENHA ÚNICA" style="text-transform:uppercase;font-weight:bold;color:#d4a574;">
+     <small style="color:#8b6f47;font-size:0.7em;">* Guarde esta senha, ela é a única forma de recuperar sua ficha.</small>
+    </div>
     <div class="campo">
      <label>Nome</label>
      <input type="text" id="nome" placeholder="Nome do pistoleiro">
     </div>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-     <div class="campo">
-      <label>Nível</label>
-      <input type="number" id="nivel" value="1" min="1">
-     </div>
-     <div class="campo">
-      <label>R$</label>
-      <input type="number" id="dinheiro" value="0" min="0">
-     </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+     <div class="campo"><label>Nível</label><input type="number" id="nivel" value="1" min="1"></div>
+     <div class="campo"><label>R$</label><input type="number" id="dinheiro" value="0" min="0"></div>
     </div>
    </div>
 
-      <div class="secao secao-ampla">
+   <!-- ATRIBUTOS -->
+   <div class="secao secao-ampla">
     <div class="secao-header">Atributos</div>
-    <div class="atributos-grid" style="grid-template-columns: repeat(4, 1fr);">
+    <div class="atributos-grid" style="grid-template-columns:repeat(4,1fr);">
+
      <div class="atributo-box">
       <label>Físico</label>
       <div class="dice-container">
        <input type="number" id="fisico" value="0" oninput="calcularValores()">
-       <button class="btn-dice" onclick="rolarDado('fisico')" title="Rolar 1d6">🎲</button>
+       <button class="btn-dice btn-dice-normal" onclick="rolarDado('fisico')" title="Rolar 1d6">🎲</button>
+       <span class="media-badge" id="mediaFisico">—</span>
       </div>
      </div>
+
      <div class="atributo-box">
       <label>Agilidade</label>
       <div class="dice-container">
        <input type="number" id="agilidade" value="0" oninput="calcularValores()">
-       <button class="btn-dice" onclick="rolarDado('agilidade')" title="Rolar 1d6">🎲</button>
+       <button class="btn-dice btn-dice-normal" onclick="rolarDado('agilidade')" title="Rolar 1d6">🎲</button>
+       <span class="media-badge" id="mediaAgilidade">—</span>
       </div>
      </div>
+
      <div class="atributo-box">
       <label>Intelecto</label>
       <div class="dice-container">
        <input type="number" id="intelecto" value="0" oninput="calcularValores()">
-       <button class="btn-dice" onclick="rolarDado('intelecto')" title="Rolar 1d6">🎲</button>
+       <button class="btn-dice btn-dice-normal" onclick="rolarDado('intelecto')" title="Rolar 1d6">🎲</button>
+       <span class="media-badge" id="mediaIntelecto">—</span>
       </div>
      </div>
+
      <div class="atributo-box">
       <label>Coragem</label>
       <div class="dice-container">
        <input type="number" id="coragem" value="0" oninput="calcularValores()">
-       <button class="btn-dice" onclick="rolarDado('coragem')" title="Rolar 1d6">🎲</button>
+       <button class="btn-dice btn-dice-normal" onclick="rolarDado('coragem')" title="Rolar 1d6">🎲</button>
+       <span class="media-badge" id="mediaCoragem">—</span>
       </div>
      </div>
+
     </div>
    </div>
 
-      <div class="secao">
+   <!-- STATUS -->
+   <div class="secao">
     <div class="secao-header">Status</div>
     <div class="status-box">
      <label>VIDA</label>
@@ -85,176 +351,192 @@
       <input type="number" id="vidaMax" value="10">
      </div>
     </div>
-        
-        <div class="check-box-status">
-     <div class="check-item">
-      <label for="agua">ÁGUA</label>
-      <input type="checkbox" id="agua">
-     </div>
-     <div class="check-item">
-      <label for="comida">COMIDA</label>
-      <input type="checkbox" id="comida">
-     </div>
+    <div class="check-box-status">
+     <div class="check-item"><label for="agua">ÁGUA</label><input type="checkbox" id="agua"></div>
+     <div class="check-item"><label for="comida">COMIDA</label><input type="checkbox" id="comida"></div>
     </div>
    </div>
 
-      <div class="secao">
+   <!-- COMBATE -->
+   <div class="secao">
     <div class="secao-header">Combate</div>
-    <div class="combate-grid" style="grid-template-columns: 1fr 1fr 1fr;">
-     <div class="combate-box">
+    <div class="combate-grid" style="grid-template-columns:1fr 1fr 1fr;">
+
+     <div class="combate-box" id="defesaBox">
       <label>DEFESA</label>
       <div class="combate-valor" id="defesaTotal">5</div>
-      <div style="margin-top: 10px;">
+      <div class="defesa-bonus-wrap" style="margin-top:10px;">
        <input type="number" id="defesaBonus" value="0" placeholder="+Bônus" oninput="calcularValores()">
       </div>
      </div>
-     <div class="combate-box">
+
+     <div class="combate-box" id="acoesBox">
       <label>AÇÕES</label>
       <div class="combate-valor" id="acoesTotal">1</div>
-      <div style="margin-top: 10px;">
+      <div style="margin-top:10px;">
        <input type="number" id="acoesBonus" value="0" placeholder="+Bônus" oninput="calcularValores()">
       </div>
      </div>
-      <div class="combate-box">
+
+     <div class="combate-box" id="iniciativaBox" style="display:flex;flex-direction:column;align-items:center;justify-content:center;">
       <label>INICIATIVA</label>
       <div class="combate-valor" id="iniciativaTotal">1</div>
-      <div style="margin-top: 10px;">
+      <div class="ini-bonus-wrap" style="margin-top:10px;">
        <input type="number" id="iniciativaBonus" value="0" placeholder="+Bônus" oninput="calcularValores()">
-       <button class="btn-dice" onclick="rolarDado('iniciativaBonus')" title="Rolar 1d6" style="width: 100%; margin-top: 5px; padding: 6px;">🎲</button>
+       <button class="btn-dice btn-dice-normal" onclick="rolarDado('iniciativaBonus')" title="Rolar 1d6" style="width:100%;margin-top:5px;padding:6px;">🎲</button>
+      </div>
+      <div class="ini-dinamico">
+       <div class="ini-valor" id="iniciativaDinamica">—</div>
+       <div class="ini-label">AGI + COR</div>
       </div>
      </div>
+
+    </div>
+    <button class="btn-combate-dinamico" id="btnCombateDinamico" onclick="toggleCombateDinamico()">
+     COMBATE DINÂMICO
+    </button>
+   </div>
+
+   <!-- TORMENTO -->
+   <div class="secao tormento-box">
+    <div class="secao-header">Tormento</div>
+    <div style="display:flex;justify-content:center;align-items:center;min-height:150px;padding:20px;">
+     <input type="text" id="tormento" value="" placeholder="Descreva o tormento..." class="tormento-input">
     </div>
    </div>
 
-   <div class="secao tormento-box">
- <div class="secao-header">Tormento</div>
- <div style="display: flex; justify-content: center; align-items: center; min-height: 150px; padding: 20px;">
-  <input type="text" id="tormento" value="" placeholder="Descreva o tormento..." class="tormento-input">
- </div>
-</div>
-
-<div class="secao secao-ampla">
+   <!-- ANTECEDENTES -->
+   <div class="secao secao-ampla">
     <div class="secao-header">Antecedentes</div>
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
-        <script>
-            const antecedentes = [
-                {id: 'combate', nome: 'Combate'}, {id: 'negocios', nome: 'Negócios'},
-                {id: 'montaria', nome: 'Montaria'}, {id: 'tradicao', nome: 'Tradição'},
-                {id: 'labuta', nome: 'Labuta'}, {id: 'exploracao', nome: 'Exploração'},
-                {id: 'roubo', nome: 'Roubo'}, {id: 'medicina', nome: 'Medicina'},
-                {id: 'tecnologia', nome: 'Tecnologia'}, {id: 'culinaria', nome: 'Culinária'},
-                {id: 'domestico', nome: 'Doméstico'}, {id: 'direcao', nome: 'Direção'}
-            ];
-
-            // Gerador automático para não repetir código manual
-            antecedentes.forEach(ant => {
-                document.write(`
-                    <div class="campo-antecedente">
-                        <label>${ant.nome}</label>
-                        <div class="pips-row">
-                            <input type="number" id="${ant.id}Mod" class="modificador-input" value="0" title="Bônus/Ônus">
-                            <div class="pips-container" data-ant="${ant.id}">
-                                <span class="pip" data-value="1"></span>
-                                <span class="pip" data-value="2"></span>
-                                <span class="pip" data-value="3"></span>
-                                <span class="pip" data-value="4"></span>
-                                <span class="pip" data-value="5"></span>
-                                <span class="pip" data-value="6"></span>
-                            </div>
-                            <input type="hidden" id="${ant.id}" value="0">
-                            <button class="btn-dice" onclick="window.rolarDado('${ant.id}')">🎲</button>
-                        </div>
-                    </div>
-                `);
-            });
-        </script>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
+     <script>
+      const antecedentes = [
+       {id:'combate',nome:'Combate'},{id:'negocios',nome:'Negócios'},
+       {id:'montaria',nome:'Montaria'},{id:'tradicao',nome:'Tradição'},
+       {id:'labuta',nome:'Labuta'},{id:'exploracao',nome:'Exploração'},
+       {id:'roubo',nome:'Roubo'},{id:'medicina',nome:'Medicina'},
+       {id:'tecnologia',nome:'Tecnologia'},{id:'culinaria',nome:'Culinária'},
+       {id:'domestico',nome:'Doméstico'},{id:'direcao',nome:'Direção'}
+      ];
+      antecedentes.forEach(ant => {
+       document.write(`
+        <div class="campo-antecedente">
+         <label>${ant.nome}</label>
+         <div class="pips-row">
+          <input type="number" id="${ant.id}Mod" class="modificador-input" value="0" title="Bônus/Ônus">
+          <div class="pips-container" data-ant="${ant.id}">
+           <span class="pip" data-value="1"></span>
+           <span class="pip" data-value="2"></span>
+           <span class="pip" data-value="3"></span>
+           <span class="pip" data-value="4"></span>
+           <span class="pip" data-value="5"></span>
+           <span class="pip" data-value="6"></span>
+          </div>
+          <input type="hidden" id="${ant.id}" value="0">
+          <button class="btn-dice btn-dice-normal" onclick="window.rolarDado('${ant.id}')">🎲</button>
+          <span class="media-badge" id="media_${ant.id}">—</span>
+         </div>
+        </div>
+       `);
+      });
+     </script>
     </div>
-</div>
+   </div>
 
-      <div class="secao secao-ampla">
+   <!-- ATAQUES -->
+   <div class="secao secao-ampla">
+    <div class="secao-header">Ataques</div>
+    <button class="btn btn-small" onclick="adicionarAtaque()" style="margin-bottom:10px;">+ Adicionar Ataque</button>
+    <div id="ataquesContainer" class="lista-items"></div>
+   </div>
+
+   <!-- HABILIDADES -->
+   <div class="secao secao-ampla">
     <div class="secao-header">Habilidades</div>
     <button class="btn btn-small" onclick="adicionarHabilidade()">+ Adicionar Habilidade</button>
     <div id="habilidadesContainer" class="lista-items"></div>
    </div>
 
-      <div class="secao secao-ampla">
+   <!-- INVENTÁRIO -->
+   <div class="secao secao-ampla">
     <div class="secao-header">Inventário</div>
     <button class="btn btn-small" onclick="adicionarItem()">+ Adicionar Item</button>
     <div id="inventarioContainer" class="lista-items"></div>
    </div>
 
-      <div class="secao secao-dupla">
+   <!-- RECOMPENSAS -->
+   <div class="secao secao-dupla">
     <div class="secao-header">Recompensas</div>
     <div class="campo">
      <textarea id="recompensas" placeholder="Descreva as recompensas e conquistas do personagem..."></textarea>
-     <label style="margin-top: 10px;">Valor da Recompensa (R$)</label>
-     <input type="number" id="valorRecompensa" value="0" min="0" style="margin-top: 5px;">
+     <label style="margin-top:10px;">Valor da Recompensa (R$)</label>
+     <input type="number" id="valorRecompensa" value="0" min="0" style="margin-top:5px;">
     </div>
    </div>
 
-      <div class="secao">
+   <!-- REPUTAÇÃO -->
+   <div class="secao">
     <div class="secao-header">Reputação</div>
-    <div style="padding: 20px;">
+    <div style="padding:20px;">
      <div class="honra-bar">
       <div class="honra-gradient"></div>
       <div class="honra-marker" id="honraMarker"></div>
      </div>
-     <div style="text-align: center; margin-top: 15px;">
+     <div style="text-align:center;margin-top:15px;">
       <label>Pontos de Reputação</label>
-      <input type="number" id="honraValor" value="0" min="-15" max="15" oninput="atualizarHonra()" style="width: 80px; text-align: center; margin-top: 5px;">
+      <input type="number" id="honraValor" value="0" min="-15" max="15" oninput="atualizarHonra()" style="width:80px;text-align:center;margin-top:5px;">
      </div>
     </div>
    </div>
-  </div>
 
-    <div class="secao montaria-secao">
+  </div><!-- /ficha-grid -->
+
+  <!-- MONTARIA -->
+  <div class="secao montaria-secao">
    <div class="secao-header">MONTARIA</div>
    <div class="montaria-grid">
-        <div class="campo montaria-nome">
+    <div class="campo montaria-nome">
      <label>Nome da Montaria</label>
      <input type="text" id="montariaNome" placeholder="Nome do companheiro">
     </div>
-
     <div class="montaria-combate-atributos">
-        <div class="secao-header-mini">Combate</div>
-        <div class="combate-grid" style="grid-template-columns: 1fr 1fr;">
-        <div class="combate-box">
-            <label class="label-vida-montaria" style="color: #ff6666; font-family: 'Rye', cursive;">VIDA</label>
-            <div class="status-inputs" style="margin-top: 5px;">
-                <input type="number" id="montariaPV" value="5" title="Vida Atual">
-                <span class="status-separator">/</span>
-                <input type="number" id="montariaPVMax" value="5" title="Vida Máxima">
-            </div>
-        </div>
-          <div class="combate-box">
-                      <label class="label-dano-montaria">DANO (1d6+Pot+Bônus)</label>
-                      <div class="dice-container" style="flex-direction: column; gap: 8px;">
-                          <input type="number" id="montariaDanoBonus" value="0" placeholder="Bônus" title="Bônus extra de dano">
-                          <button class="btn-dice" onclick="rolarDanoMontaria()" style="width: 100%;">🎲</button>
-                      </div>
-                  </div>
-        </div>
-            
-        <div class="secao-header-mini" style="margin-top: 15px;">Atributos</div>
-        <div class="atributos-grid" style="grid-template-columns: 1fr 1fr;">
-            <div class="atributo-box">
-                <label>Potência</label>
-                <div class="dice-container">
-                    <input type="number" id="montariaPotencia" value="0">
-                    <button class="btn-dice" onclick="rolarDado('montariaPotencia')" title="Rolar Potência">🎲</button>
-                </div>
-            </div>
-            <div class="atributo-box">
-                <label>Resistência</label>
-                <div class="dice-container">
-                    <input type="number" id="montariaResistencia" value="0">
-                    <button class="btn-dice" onclick="rolarDado('montariaResistencia')" title="Rolar Resistência">🎲</button>
-                </div>
-            </div>
-        </div>
+     <div class="secao-header-mini">Combate</div>
+     <div class="combate-grid" style="grid-template-columns:1fr 1fr;">
+      <div class="combate-box">
+       <label class="label-vida-montaria" style="color:#ff6666;font-family:'Rye',cursive;">VIDA</label>
+       <div class="status-inputs" style="margin-top:5px;">
+        <input type="number" id="montariaPV" value="5" title="Vida Atual">
+        <span class="status-separator">/</span>
+        <input type="number" id="montariaPVMax" value="5" title="Vida Máxima">
+       </div>
+      </div>
+      <div class="combate-box">
+       <label class="label-dano-montaria">DANO (1d6+Pot+Bônus)</label>
+       <div class="dice-container" style="flex-direction:column;gap:8px;">
+        <input type="number" id="montariaDanoBonus" value="0" placeholder="Bônus" title="Bônus extra de dano">
+        <button class="btn-dice" onclick="rolarDanoMontaria()" style="width:100%;">🎲</button>
+       </div>
+      </div>
+     </div>
+     <div class="secao-header-mini" style="margin-top:15px;">Atributos</div>
+     <div class="atributos-grid" style="grid-template-columns:1fr 1fr;">
+      <div class="atributo-box">
+       <label>Potência</label>
+       <div class="dice-container">
+        <input type="number" id="montariaPotencia" value="0">
+        <button class="btn-dice" onclick="rolarDado('montariaPotencia')" title="Rolar Potência">🎲</button>
+       </div>
+      </div>
+      <div class="atributo-box">
+       <label>Resistência</label>
+       <div class="dice-container">
+        <input type="number" id="montariaResistencia" value="0">
+        <button class="btn-dice" onclick="rolarDado('montariaResistencia')" title="Rolar Resistência">🎲</button>
+       </div>
+      </div>
+     </div>
     </div>
-
-        <div class="montaria-inventario">
+    <div class="montaria-inventario">
      <div class="secao-header-mini">Inventário da Montaria</div>
      <button class="btn btn-small" onclick="adicionarItemMontaria()">+ Adicionar Item</button>
      <div id="inventarioMontariaContainer" class="lista-items"></div>
@@ -262,10 +544,21 @@
    </div>
   </div>
 
-  <div class="navigation-row" style="text-align: center; margin-top: 40px; padding-bottom: 40px;">
-    <button class="btn btn-base" onclick="irParaBase()">🏠 Ir para a Casa</button>
+  <div class="navigation-row" style="text-align:center;margin-top:40px;padding-bottom:20px;">
+   <button class="btn btn-base" onclick="irParaBase()">Ir para a Casa</button>
   </div>
 
-  <script type="module" src="script.js"></script>
+  <footer style="margin-top:20px;padding:18px 24px;border-top:1px solid #3d2f24;display:flex;justify-content:center;align-items:center;gap:30px;flex-wrap:wrap;">
+   <span style="font-family:'Special Elite';color:#5a4a3a;font-size:0.75em;letter-spacing:1px;text-transform:uppercase;">Livros de Regras</span>
+   <a href="https://drive.google.com/file/d/1U7gAiiDm70RQ-wAdEMBiPn34pP6R8JmE/view?usp=sharing" target="_blank"
+      style="font-family:'Special Elite';color:#8b6f47;font-size:0.8em;text-decoration:none;letter-spacing:1px;border-bottom:1px dashed #5a4a3a;padding-bottom:2px;"
+      onmouseover="this.style.color='#d4a574'" onmouseout="this.style.color='#8b6f47'">O SOM DAS SEIS</a>
+   <a href="https://docs.google.com/document/d/1Kng5pw-3uKlr5L1G1XfDdz2YVF5tkv98oQaSkpUR6yk/edit?usp=sharing" target="_blank"
+      style="font-family:'Special Elite';color:#8b6f47;font-size:0.8em;text-decoration:none;letter-spacing:1px;border-bottom:1px dashed #5a4a3a;padding-bottom:2px;"
+      onmouseover="this.style.color='#d4a574'" onmouseout="this.style.color='#8b6f47'">PÓ E SANGUE</a>
+  </footer>
+
+ </div>
+ <script type="module" src="script.js"></script>
 </body>
 </html>

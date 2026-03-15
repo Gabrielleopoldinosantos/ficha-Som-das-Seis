@@ -34,6 +34,12 @@
       margin-bottom: 20px;
     }
 
+    .ficha-grid {
+      display: grid;
+      grid-template-columns: repeat (3, 1rf);
+      gap: 20px;
+    }
+
     .secao {
       background: linear-gradient(135deg, #2a1f1a 0%, #1f1712 100%);
       border: 3px solid #8b6f47;
