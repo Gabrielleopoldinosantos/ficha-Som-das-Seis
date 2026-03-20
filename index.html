@@ -7,6 +7,161 @@
  <link href="https://fonts.googleapis.com/css2?family=Rye&family=Special+Elite&display=swap" rel="stylesheet">
  <link rel="stylesheet" href="css/style.css">
  <style>
+  /* ── HONRA MARKER: reseta posição inicial; o JS (inline style) sempre vence ── */
+  #honraMarker {
+    left: 0;
+    transform: translateY(-50%);
+  }
+
+  /* ── SAVE INDICATOR ── */
+  .save-indicator {
+    position: fixed;
+    top: 16px;
+    right: 20px;
+    z-index: 9999;
+    font-family: 'Special Elite', monospace;
+    font-size: 0.78em;
+    letter-spacing: 2px;
+    padding: 6px 14px;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    pointer-events: none;
+    transition: opacity 0.4s;
+    min-width: 120px;
+  }
+  .save-indicator.idle { opacity: 0; }
+  .save-indicator.saving {
+    background: rgba(20,16,10,0.92);
+    border: 1px solid #b8860b;
+    color: #ffd700;
+    opacity: 1;
+  }
+  .save-indicator.saved {
+    background: rgba(10,20,10,0.92);
+    border: 1px solid #4a8a4a;
+    color: #7abf7a;
+    opacity: 1;
+  }
+  .save-indicator.error {
+    background: rgba(30,5,5,0.92);
+    border: 1px solid #8b2222;
+    color: #ff6666;
+    opacity: 1;
+  }
+  .save-dot {
+    width: 8px; height: 8px;
+    background: #ffd700;
+    border-radius: 50%;
+    animation: pulse-dot 0.8s ease-in-out infinite alternate;
+    display: inline-block;
+  }
+  .save-check { color: #7abf7a; font-size: 1.1em; }
+  .save-x     { color: #ff6666; font-size: 1.1em; }
+  @keyframes pulse-dot {
+    from { opacity: 0.4; transform: scale(0.8); }
+    to   { opacity: 1;   transform: scale(1.2); }
+  }
+
+  /* ── AVATAR ── */
+  .avatar-frame {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    flex-shrink: 0;
+  }
+  /* Moldura decorativa com cantos estilo faroeste */
+  .avatar-frame::before,
+  .avatar-frame::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border: 2px solid #8b6f47;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .avatar-frame::before { clip-path: polygon(0 12px,12px 0,100% 0,100% 12px,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 calc(100% - 12px)); }
+  .avatar-frame::after  { clip-path: polygon(12px 0,calc(100% - 12px) 0,100% 12px,100% calc(100% - 12px),calc(100% - 12px) 100%,12px 100%,0 calc(100% - 12px),0 12px); border-color: #5a4030; inset: -2px; }
+
+  #avatarImg {
+    width: 200px; height: 200px;
+    object-fit: cover;
+    display: block;
+    border: 2px solid #6a4f35;
+    background: #0f0d0a;
+  }
+  /* estado: sem imagem — placeholder visível */
+  #avatarImg.sem-foto {
+    display: none;
+  }
+  #avatarPlaceholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #0f0d0a;
+    border: 2px solid #3d2f24;
+    color: #4a3a2a;
+    font-family: 'Special Elite', monospace;
+    font-size: 0.62em;
+    letter-spacing: 1px;
+    gap: 5px;
+    pointer-events: none;
+  }
+  #avatarPlaceholder span { font-size: 2em; opacity: 0.4; }
+  /* botão de trocar foto — aparece abaixo da moldura */
+  .avatar-edit-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    margin-top: 6px;
+    width: 200px;
+    padding: 6px 0;
+    background: #1a1410;
+    border: 1px solid #4a3a2a;
+    color: #8b6f47;
+    font-family: 'Special Elite', monospace;
+    font-size: 0.75em;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .avatar-edit-btn:hover {
+    border-color: #d4a574;
+    color: #d4a574;
+  }
+
+
+  /* ── DIÁRIO DE SESSÃO ── */
+  .diario-secao {
+    grid-column: 1 / -1;
+  }
+  #diarioSessao {
+    min-height: 120px;
+    background: #0a0908 !important;
+    border: 1px solid #3d2f24 !important;
+    color: #c9a96e;
+    font-family: 'Special Elite', monospace;
+    font-size: 0.9em;
+    line-height: 1.6;
+    padding: 12px;
+    resize: vertical;
+  }
+  #diarioSessao::placeholder { color: #4a3a2a; font-style: italic; }
+  .diario-timestamp {
+    font-family: 'Special Elite', monospace;
+    font-size: 0.7em;
+    color: #4a3a2a;
+    letter-spacing: 1px;
+    text-align: right;
+    margin-top: 5px;
+  }
+
   /* ── COMBATE DINÂMICO ── */
   .media-badge {
     display: none;
@@ -25,7 +180,6 @@
   body.combate-dinamico .media-badge { display: inline-block; }
   body.combate-dinamico .btn-dice-normal { display: none !important; }
   body.combate-dinamico #acoesBox { display: none !important; }
-  /* quando ações some, defesa e iniciativa ficam 2 colunas, centralizadas */
   body.combate-dinamico .combate-grid { grid-template-columns: 1fr 1fr !important; }
   body.combate-dinamico #defesaBox,
   body.combate-dinamico #iniciativaBox {
@@ -63,7 +217,6 @@
     margin-top: 5px;
   }
 
-  /* ataque dinâmico */
   body.combate-dinamico .atk-btn-rolar-atk  { display: none !important; }
   body.combate-dinamico .atk-btn-rolar-dano { display: none !important; }
   body.combate-dinamico .atk-media-atk  { display: inline-flex !important; }
@@ -114,7 +267,6 @@
     text-transform: uppercase;
   }
   .ataque-header input[type="text"]::placeholder { color: #5a4030; letter-spacing: 1px; }
-  /* Grid: ATK à esq, divisor, DANO à dir */
   .ataque-corpo {
     display: grid;
     grid-template-columns: 1fr 1px 1fr;
@@ -127,7 +279,6 @@
     padding: 14px 12px;
   }
   .ataque-col-sep { background: #2a2018; }
-  /* rótulo da coluna */
   .ataque-col-label {
     font-family: 'Rye', cursive;
     font-size: 0.65em;
@@ -136,7 +287,6 @@
   }
   .col-atk .ataque-col-label  { color: #b8860b; }
   .col-dano .ataque-col-label { color: #4682b4; }
-  /* linha de controles (input + botão lado a lado) */
   .ataque-controls {
     display: flex;
     align-items: center;
@@ -144,7 +294,6 @@
     width: 100%;
     justify-content: center;
   }
-  /* inputs de bônus */
   .atk-bonus, .atk-dano-bonus {
     width: 56px !important;
     height: 34px !important;
@@ -156,7 +305,6 @@
   }
   .atk-bonus      { border: 1px solid #7a5a20 !important; color: #d4a574 !important; }
   .atk-dano-bonus { border: 1px solid #2a5a8a !important; color: #87ceeb !important; }
-  /* dropdown */
   .ataque-dano-select {
     background: #050403;
     border: 1px solid #2a5a8a;
@@ -170,7 +318,6 @@
     text-align: center;
   }
   .ataque-dano-select:focus { outline: none; border-color: #5a9aca; }
-  /* botões de rolar */
   .atk-btn-rolar-atk {
     background: linear-gradient(160deg, #5a3a10 0%, #2a1a08 100%);
     color: #e8c07a;
@@ -205,7 +352,6 @@
     background: linear-gradient(160deg, #142850 0%, #0a1a2a 100%);
     box-shadow: 0 0 8px rgba(70,130,180,0.5);
   }
-  /* badges modo dinâmico */
   .atk-media-atk, .atk-media-dano {
     display: none;
     align-items: center;
@@ -220,7 +366,6 @@
   .atk-media-atk  { color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.4); }
   .atk-media-dano { color: #87ceeb; text-shadow: 0 0 10px rgba(135,206,235,0.4); }
 
-  /* botão combate dinâmico */
   .btn-combate-dinamico {
     width: 100%;
     margin-top: 12px;
@@ -255,7 +400,6 @@
     from { opacity: 1; transform: translate(-50%,-50%) scale(1); }
     to   { opacity: 0; transform: translate(-50%,-50%) scale(0.6); }
   }
-  /* sobrescreve as animações de crítico também */
   @keyframes diceRollSuccess {
     from { opacity: 0; transform: translate(-50%,-50%) scale(0.6) rotate(-10deg); }
     to   { opacity: 1; transform: translate(-50%,-50%) scale(1) rotate(0deg); }
@@ -267,7 +411,12 @@
  </style>
 </head>
 <body>
+
+ <!-- Indicador de salvamento -->
+ <div id="saveIndicator" class="save-indicator idle"></div>
+
  <div class="container">
+
   <h1> O SOM DAS SEIS </h1>
 
   <div class="buttons-row">
@@ -281,18 +430,36 @@
    <!-- INFORMAÇÕES -->
    <div class="secao secao-ampla">
     <div class="secao-header">Informações do Personagem</div>
-    <div class="campo">
-     <label>CÓDIGO DE ACESSO (SENHA ÚNICA)</label>
-     <input type="text" id="senha" placeholder="USE UMA SENHA ÚNICA" style="text-transform:uppercase;font-weight:bold;color:#d4a574;">
-     <small style="color:#8b6f47;font-size:0.7em;">* Guarde esta senha, ela é a única forma de recuperar sua ficha.</small>
-    </div>
-    <div class="campo">
-     <label>Nome</label>
-     <input type="text" id="nome" placeholder="Nome do pistoleiro">
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-     <div class="campo"><label>Nível</label><input type="number" id="nivel" value="1" min="1"></div>
-     <div class="campo"><label>R$</label><input type="number" id="dinheiro" value="0" min="0"></div>
+    <div style="display:flex;gap:18px;align-items:flex-start;">
+
+     <!-- campos -->
+     <div style="flex:1;min-width:0;">
+      <div class="campo">
+       <label>CÓDIGO DE ACESSO (SENHA ÚNICA)</label>
+       <input type="text" id="senha" placeholder="USE UMA SENHA ÚNICA" style="text-transform:uppercase;font-weight:bold;color:#d4a574;">
+       <small style="color:#8b6f47;font-size:0.7em;">* Guarde esta senha, ela é a única forma de recuperar sua ficha.</small>
+      </div>
+      <div class="campo">
+       <label>Nome</label>
+       <input type="text" id="nome" placeholder="Nome do pistoleiro">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+       <div class="campo"><label>Nível</label><input type="number" id="nivel" value="1" min="1"></div>
+       <div class="campo"><label>R$</label><input type="number" id="dinheiro" value="0" min="0"></div>
+      </div>
+     </div>
+
+     <!-- avatar -->
+     <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;">
+      <label style="font-size:0.75em;letter-spacing:1px;margin-bottom:6px;color:#8b6f47;">FOTO</label>
+      <div class="avatar-frame">
+       <img id="avatarImg" class="sem-foto" src="" alt="Avatar">
+       <div id="avatarPlaceholder"><span>🤠</span>SEM FOTO</div>
+      </div>
+      <button class="avatar-edit-btn" onclick="window.abrirInputAvatar()">alterar</button>
+      <input type="hidden" id="avatarUrl">
+     </div>
+
     </div>
    </div>
 
@@ -486,6 +653,17 @@
       <label>Pontos de Reputação</label>
       <input type="number" id="honraValor" value="0" min="-15" max="15" oninput="atualizarHonra()" style="width:80px;text-align:center;margin-top:5px;">
      </div>
+    </div>
+   </div>
+
+   <!-- DIÁRIO DE SESSÃO -->
+   <div class="secao diario-secao">
+    <div class="secao-header">Diário</div>
+    <div class="campo" style="padding: 5px 0;">
+     <label>NOTAS RÁPIDAS</label> 
+     <textarea id="diarioSessao"
+      placeholder="Estas notas ficam salvas junto com sua ficha."></textarea>
+     <div class="diario-timestamp" id="diarioTimestamp"></div>
     </div>
    </div>
 

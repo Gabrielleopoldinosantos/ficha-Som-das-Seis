@@ -19,17 +19,63 @@ const db = getFirestore(app);
 let idFichaAtual = localStorage.getItem('idFichaAtual') || null;
 
 // ─────────────────────────────────────────
+//  INDICADOR DE SALVAMENTO
+// ─────────────────────────────────────────
+function mostrarStatusSalvamento(status) {
+    const indicator = document.getElementById('saveIndicator');
+    if (!indicator) return;
+    indicator.className = 'save-indicator ' + status;
+    if (status === 'saving') {
+        indicator.innerHTML = '<span class="save-dot"></span> SALVANDO...';
+    } else if (status === 'saved') {
+        indicator.innerHTML = '<span class="save-check">✓</span> SALVO';
+        setTimeout(() => {
+            indicator.className = 'save-indicator idle';
+            indicator.innerHTML = '';
+        }, 3000);
+    } else if (status === 'error') {
+        indicator.innerHTML = '<span class="save-x">✗</span> ERRO AO SALVAR';
+    }
+}
+
+// ─────────────────────────────────────────
+//  AVATAR DO PERSONAGEM
+// ─────────────────────────────────────────
+window.abrirInputAvatar = function() {
+    const url = prompt('Cole aqui a URL da imagem do seu personagem:', document.getElementById('avatarUrl')?.value || '');
+    if (url !== null) {
+        const input = document.getElementById('avatarUrl');
+        if (input) input.value = url;
+        atualizarAvatar(url);
+        autoSalvar();
+    }
+};
+
+function atualizarAvatar(url) {
+    const img         = document.getElementById('avatarImg');
+    const placeholder = document.getElementById('avatarPlaceholder');
+    if (!img) return;
+    if (url && url.trim()) {
+        img.src = url.trim();
+        img.classList.remove('sem-foto');          // mostra a imagem
+        if (placeholder) placeholder.style.display = 'none';
+    } else {
+        img.src = '';
+        img.classList.add('sem-foto');             // esconde a imagem
+        if (placeholder) placeholder.style.display = 'flex';
+    }
+}
+
+// ─────────────────────────────────────────
 //  COMBATE DINÂMICO
 // ─────────────────────────────────────────
 let modoDinamico = false;
 
-// Converte o dropdown de dano para valor médio
 function danoParaMedia(opcao) {
     const tabela = { '0': 0, '1d3': 1, '1d6': 3, '2d6': 6, '3d6': 9, '4d6': 12, '5d6': 15, '6d6': 18 };
     return tabela[opcao] ?? 0;
 }
 
-// Calcula a média de atributo/antecedente: 3 + pontos + modificador
 function calcularMedia(campoId) {
     const pontos  = parseInt(document.getElementById(campoId)?.value) || 0;
     const modEl   = document.getElementById(campoId + 'Mod');
@@ -38,26 +84,22 @@ function calcularMedia(campoId) {
 }
 
 function atualizarMediasVisuais() {
-    // Atributos
     ['fisico','agilidade','intelecto','coragem'].forEach(id => {
         const el = document.getElementById('media' + id.charAt(0).toUpperCase() + id.slice(1));
         if (el) el.textContent = calcularMedia(id);
     });
 
-    // Antecedentes
     ['combate','negocios','montaria','tradicao','labuta','exploracao',
      'roubo','medicina','tecnologia','culinaria','domestico','direcao'].forEach(id => {
         const el = document.getElementById('media_' + id);
         if (el) el.textContent = calcularMedia(id);
     });
 
-    // Iniciativa dinâmica = AGI + COR
     const agi = parseInt(document.getElementById('agilidade')?.value) || 0;
     const cor = parseInt(document.getElementById('coragem')?.value) || 0;
     const elIni = document.getElementById('iniciativaDinamica');
     if (elIni) elIni.textContent = agi + cor;
 
-    // Ataques: atualiza médias de ataque e dano
     document.querySelectorAll('.ataque-box').forEach(box => {
         const bonusAtkEl  = box.querySelector('.atk-bonus');
         const danoSel     = box.querySelector('.ataque-dano-select');
@@ -138,7 +180,7 @@ function criarEstruturaAtaque(nome = '', bonusAtk = 0, dano = '0', bonusDano = 0
           <span class="ataque-col-label">Ataque</span>
           <div class="ataque-controls">
             <input type="number" class="atk-bonus" value="${bonusAtk}" title="Bônus/ônus no ataque">
-            <button class="atk-btn-rolar-atk" onclick="window.rolarAtaque(this)">🎲 ATK</button>
+            <button class="atk-btn-rolar-atk" onclick="window.rolarAtaque(this)">🎲 ATQ</button>
           </div>
           <span class="atk-media-atk">—</span>
         </div>
@@ -176,13 +218,11 @@ window.adicionarAtaque = function() {
     document.getElementById('ataquesContainer').appendChild(criarEstruturaAtaque());
 };
 
-// Rola ataque: Combate (pips + mod) + bônus do ataque
 window.rolarAtaque = function(btn) {
     const box = btn.closest('.ataque-box');
     const bonusAtkEl = box.querySelector('.atk-bonus');
     const bonusAtk   = parseInt(bonusAtkEl?.value) || 0;
 
-    // Antecedente Combate
     const pontCombate = parseInt(document.getElementById('combate')?.value) || 0;
     const modCombate  = parseInt(document.getElementById('combateMod')?.value) || 0;
     const totalBonus  = pontCombate + modCombate + bonusAtk;
@@ -195,7 +235,6 @@ window.rolarAtaque = function(btn) {
     registrarRolagemNoFirebase(' ' + nomeAtaque, dado, totalBonus, total);
 };
 
-// Rola dano de ataque
 window.rolarDanoAtaque = function(btn) {
     const box = btn.closest('.ataque-box');
     const danoSel   = box.querySelector('.ataque-dano-select')?.value || '0';
@@ -207,7 +246,6 @@ window.rolarDanoAtaque = function(btn) {
         return;
     }
 
-    const dados = parseInt(danoSel); // número de d6 (ou 1 p/ 1d3)
     let resultado;
     if (danoSel === '1d3') {
         resultado = Math.floor(Math.random() * 3) + 1;
@@ -244,6 +282,8 @@ async function salvarFichaFirebase() {
         localStorage.setItem('idFichaAtual', idFichaAtual);
     }
 
+    mostrarStatusSalvamento('saving');
+
     const ficha = {
         id: idFichaAtual, nome: nomePersonagem, senha,
         nivel: document.getElementById('nivel').value,
@@ -264,6 +304,10 @@ async function salvarFichaFirebase() {
         valorRecompensa: document.getElementById('valorRecompensa').value,
         honraValor: document.getElementById('honraValor').value,
         modoDinamico: modoDinamico,
+        // Avatar — apenas URL, não armazenamos a imagem em si
+        avatarUrl: document.getElementById('avatarUrl')?.value || '',
+        // Diário de sessão
+        diarioSessao: document.getElementById('diarioSessao')?.value || '',
         // Antecedentes
         combate: document.getElementById('combate').value,
         combateMod: document.getElementById('combateMod').value,
@@ -306,7 +350,11 @@ async function salvarFichaFirebase() {
 
     try {
         await setDoc(doc(db, "fichas", idFichaAtual), ficha);
-    } catch (e) { console.error("Erro ao salvar:", e); }
+        mostrarStatusSalvamento('saved');
+    } catch (e) {
+        console.error("Erro ao salvar:", e);
+        mostrarStatusSalvamento('error');
+    }
 }
 
 // ─────────────────────────────────────────
@@ -320,6 +368,11 @@ function preencherCampos(ficha) {
         if (el && typeof ficha[key] !== 'object' && key !== 'modoDinamico') {
             el.type === 'checkbox' ? (el.checked = ficha[key]) : (el.value = ficha[key]);
         }
+    }
+
+    // Carregar avatar
+    if (ficha.avatarUrl) {
+        atualizarAvatar(ficha.avatarUrl);
     }
 
     document.querySelectorAll('.pips-container').forEach(container => {
@@ -350,7 +403,7 @@ function preencherCampos(ficha) {
 
     // Modo dinâmico
     if (ficha.modoDinamico) {
-        modoDinamico = false; // força o toggle
+        modoDinamico = false;
         window.toggleCombateDinamico();
     }
 
@@ -386,7 +439,6 @@ window.rolarDado = function(campoId) {
     registrarRolagemNoFirebase(nome, dado, bonus, total);
 };
 
-// ── Pop-up: fecha apenas ao clicar, com fade-in/out ──
 function mostrarResultadoDado(dado, bonus, total) {
     document.querySelectorAll('.dice-result').forEach(el => {
         el.style.animation = 'diceOut 0.25s ease-out forwards';
@@ -405,7 +457,6 @@ function mostrarResultadoDado(dado, bonus, total) {
         critico = '<div class="critico-label">ERRO CRÍTICO!</div>';
     }
 
-    // Aplica animação de entrada
     div.style.animation = 'diceIn 0.35s ease-out forwards';
 
     div.innerHTML = `
@@ -463,8 +514,20 @@ window.calcularValores = function() {
 };
 
 window.atualizarHonra = function() {
-    const val = Math.max(-15, Math.min(15, parseInt(document.getElementById('honraValor').value) || 0));
-    document.getElementById('honraMarker').style.left = ((val + 15) / 30 * 100) + '%';
+    const input  = document.getElementById('honraValor');
+    const marker = document.getElementById('honraMarker');
+    if (!input || !marker) return;
+    const val  = Math.max(-15, Math.min(15, parseInt(input.value) || 0));
+    const bar  = marker.parentElement;
+    const W    = bar.offsetWidth;   // largura total da barra
+    const mW   = 40;                // largura fixa da bolinha
+    // Mapeia [-15,+15] para [0, W-mW] em px:
+    //   val=-15 → left=0       (bolinha na borda esquerda, 100% dentro)
+    //   val= 0  → left=(W-mW)/2 (bolinha centrada)
+    //   val=+15 → left=W-mW   (bolinha na borda direita, 100% dentro)
+    const left = ((val + 15) / 30) * (W - mW);
+    marker.style.left      = left + 'px';
+    marker.style.transform = 'translateY(-50%)';
 };
 
 window.toggleDescricao = (btn) => {
@@ -476,6 +539,7 @@ let timeoutSalvar = null;
 function autoSalvar() {
     if (!document.getElementById('senha').value.trim()) return;
     clearTimeout(timeoutSalvar);
+    mostrarStatusSalvamento('saving');
     timeoutSalvar = setTimeout(() => salvarFichaFirebase(), 1500);
 }
 window.triggerSalvar = autoSalvar;
@@ -546,8 +610,6 @@ window.addEventListener('load', async () => {
         if (s.exists()) preencherCampos(s.data());
     }
 
-    // Event delegation — captura input/change de QUALQUER elemento,
-    // inclusive itens, habilidades e ataques criados dinamicamente
     document.addEventListener('input',  e => {
         if (e.target.matches('input, textarea, select')) {
             if (modoDinamico) atualizarMediasVisuais();
@@ -562,7 +624,10 @@ window.addEventListener('load', async () => {
     });
 
     calcularValores();
+    // Chama duas vezes: uma imediata e uma após o browser pintar, garantindo que
+    // getBoundingClientRect() já retorna a largura real da barra
     atualizarHonra();
+    setTimeout(atualizarHonra, 50);
 });
 
 // Exportações
