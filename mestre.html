@@ -7,63 +7,230 @@
     <link href="https://fonts.googleapis.com/css2?family=Rye&family=Special+Elite&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <style>
-        .mestre-container { display: flex; gap: 20px; padding: 20px; }
-        .grid-players { flex: 3; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
-        .log-lateral { flex: 1; background: rgba(0,0,0,0.3); border: 2px solid #8b6f47; border-radius: 8px; padding: 15px; height: 85vh; overflow-y: auto; }
-        
-        .card-player { background: #1a1410; border: 2px solid #5a4a3a; padding: 15px; border-radius: 8px; position: relative; }
-        .card-header { font-family: 'Rye', cursive; color: #d4a574; border-bottom: 1px solid #5a4a3a; margin-bottom: 10px; }
+        body { background: #0a0908; }
+
+        .mestre-layout { display: flex; flex-direction: column; gap: 20px; padding: 20px; }
+
+        .mestre-top { display: flex; gap: 20px; align-items: flex-start; }
+
+        .grid-players {
+            flex: 3;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 15px;
+        }
+
+        .log-lateral {
+            flex: 1;
+            min-width: 200px;
+            background: rgba(0,0,0,0.3);
+            border: 2px solid #8b6f47;
+            border-radius: 8px;
+            padding: 15px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: sticky;
+            top: 20px;
+        }
+
+        /* ── cards ── */
+        .card-player { background: #1a1410; border: 2px solid #5a4a3a; padding: 15px; border-radius: 8px; }
+        .card-header {
+            font-family: 'Rye', cursive;
+            color: #d4a574;
+            border-bottom: 1px solid #5a4a3a;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .card-avatar { width: 36px; height: 36px; border-radius: 3px; border: 1px solid #5a4a3a; object-fit: cover; flex-shrink: 0; }
+        .card-avatar-placeholder { width: 36px; height: 36px; border-radius: 3px; border: 1px solid #3d2f24; background: #0f0d0a; display: flex; align-items: center; justify-content: center; font-size: 1.2em; flex-shrink: 0; }
         .status-mini { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.9em; }
         .vida-barra { background: #331111; height: 10px; border-radius: 5px; overflow: hidden; margin-top: 5px; }
         .vida-progresso { background: #ff4444; height: 100%; transition: width 0.3s; }
-        
+        .info-combat-bar { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.4); padding: 8px 12px; border-radius: 4px; border: 1px solid #5a4a3a; margin-bottom: 15px; font-family: 'Special Elite', monospace; }
+        .info-combat-item { display: flex; align-items: center; gap: 5px; font-size: 0.85em; color: #c9a96e; }
+        .info-combat-item b { color: #e8dcc0; font-size: 1.1em; }
+        .divider { color: #5a4a3a; font-weight: bold; }
+
+        /* ── log ── */
         .log-item { background: #2a1f1a; border-left: 4px solid #d4a574; padding: 8px; margin-bottom: 10px; font-size: 0.8em; animation: fadeIn 0.3s ease; }
         .log-nome { color: #c9a96e; font-weight: bold; display: block; }
         .log-detalhe { font-style: italic; color: #e8dcc0; }
         .log-resultado { float: right; font-size: 1.5em; color: #d4a574; font-family: 'Rye', cursive; }
 
-    .info-combat-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background: rgba(0, 0, 0, 0.4);
-        padding: 8px 12px;
-        border-radius: 4px;
-        border: 1px solid #5a4a3a;
-        margin-bottom: 15px;
-        font-family: 'Special Elite', monospace;
-    }
+        /* ── TRACKER SIMPLIFICADO ── */
+        .tracker-box {
+            background: #0d120d;
+            border: 2px solid #3a5a3a;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .tracker-head {
+            background: #111a11;
+            border-bottom: 1px solid #3a5a3a;
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .tracker-title {
+            font-family: 'Rye', cursive;
+            color: #6abf6a;
+            font-size: 0.95em;
+            letter-spacing: 2px;
+        }
 
-    .info-combat-item {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        font-size: 0.85em;
-        color: #c9a96e;
-    }
+        /* linha de input */
+        .tracker-add {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .tracker-add input {
+            background: #0a100a;
+            border: 1px solid #3a5a3a;
+            color: #c8e8c8;
+            font-family: 'Special Elite', monospace;
+            font-size: 0.82em;
+            padding: 5px 10px;
+            border-radius: 3px;
+            height: 30px;
+        }
+        .tracker-add input::placeholder { color: #2a4a2a; }
+        .tracker-add input:focus { outline: none; border-color: #6abf6a; }
+        #addNome { width: 160px; }
+        #addVal  { width: 72px; }
+        .t-btn {
+            background: rgba(58,90,58,0.3);
+            border: 1px solid #3a5a3a;
+            color: #6abf6a;
+            font-family: 'Special Elite', monospace;
+            font-size: 0.78em;
+            padding: 5px 12px;
+            height: 30px;
+            border-radius: 3px;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: background 0.15s;
+            white-space: nowrap;
+        }
+        .t-btn:hover { background: rgba(58,90,58,0.6); }
+        .t-btn.danger { border-color: #5a3a3a; color: #bf6a6a; }
+        .t-btn.danger:hover { background: rgba(90,58,58,0.5); }
 
-    .info-combat-item b {
-        color: #e8dcc0;
-        font-size: 1.1em;
-    }
+        /* lista */
+        #trackerLista { padding: 6px 8px; }
 
-    .divider {
-        color: #5a4a3a;
-        font-weight: bold;
-    }
-        
-        @keyframes fadeIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        .tracker-empty {
+            text-align: center;
+            color: #2a4a2a;
+            font-family: 'Special Elite', monospace;
+            font-size: 0.82em;
+            padding: 18px;
+            font-style: italic;
+        }
+
+        .t-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 8px;
+            margin-bottom: 4px;
+            border-radius: 3px;
+            font-family: 'Special Elite', monospace;
+        }
+        .t-player { background: rgba(20,35,20,0.7); border-left: 3px solid #3a7a3a; }
+        .t-extra  { background: rgba(35,20,20,0.7); border-left: 3px solid #7a3a3a; }
+
+        .t-pos {
+            font-family: 'Rye', cursive;
+            color: #5a7a5a;
+            font-size: 0.75em;
+            width: 20px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+        .t-val {
+            background: #0a160a;
+            border: 1px solid #3a6a3a;
+            color: #7abf7a;
+            font-size: 0.95em;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 3px;
+            min-width: 30px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .t-extra .t-val { border-color: #6a3a3a; color: #bf7a7a; }
+        .t-avatar {
+            width: 22px; height: 22px;
+            border-radius: 2px;
+            object-fit: cover;
+            border: 1px solid #3a5a3a;
+            flex-shrink: 0;
+        }
+        .t-avatar-blank { width: 22px; flex-shrink: 0; }
+        .t-nome {
+            flex: 1;
+            color: #c8e0c8;
+            font-size: 0.88em;
+            letter-spacing: 0.5px;
+        }
+        .t-tag {
+            font-size: 0.65em;
+            color: #3a6a3a;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .t-remove {
+            background: none;
+            border: none;
+            color: #4a3a3a;
+            cursor: pointer;
+            font-size: 0.8em;
+            padding: 2px 5px;
+            border-radius: 2px;
+            transition: color 0.15s;
+            flex-shrink: 0;
+        }
+        .t-remove:hover { color: #bf7a7a; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateX(15px); } to { opacity: 1; transform: translateX(0); } }
     </style>
 </head>
 <body>
-    <h1>PAINEL DO MESTRE</h1>
-    <div class="mestre-container">
-        <div id="gridPlayers" class="grid-players"></div>
+    <h1 style="font-family:'Rye',cursive;text-align:center;color:#d4a574;padding:20px 0 10px;letter-spacing:3px;text-shadow:3px 3px 6px rgba(0,0,0,0.8);">PAINEL DO MESTRE</h1>
 
-        <div class="log-lateral">
-            <h3 style="font-family: 'Rye'; text-align: center; color: #d4a574;">Últimas Rolagens</h3>
-            <div id="logRolagens"></div>
+    <div class="mestre-layout">
+
+        <!-- grid + log -->
+        <div class="mestre-top">
+            <div id="gridPlayers" class="grid-players"></div>
+            <div class="log-lateral">
+                <h3 style="font-family:'Rye';text-align:center;color:#d4a574;margin-bottom:12px;">Últimas Rolagens</h3>
+                <div id="logRolagens"></div>
+            </div>
         </div>
+
+        <!-- tracker -->
+        <div class="tracker-box">
+            <div class="tracker-head">
+                <span class="tracker-title">⚔ INICIATIVA</span>
+                <div class="tracker-add">
+                    <input type="text"   id="addNome" placeholder="Nome / NPC...">
+                    <input type="number" id="addVal"  placeholder="Valor">
+                    <button class="t-btn" onclick="window.adicionarEntrada()">+ ADICIONAR</button>
+                    <button class="t-btn danger" onclick="window.limparExtras()">✕ LIMPAR EXTRAS</button>
+                </div>
+            </div>
+            <div id="trackerLista"></div>
+        </div>
+
     </div>
 
     <script type="module" src="mestre.js"></script>
