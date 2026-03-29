@@ -57,11 +57,11 @@ function atualizarAvatar(url) {
     if (!img) return;
     if (url && url.trim()) {
         img.src = url.trim();
-        img.classList.remove('sem-foto');          // mostra a imagem
+        img.classList.remove('sem-foto');
         if (placeholder) placeholder.style.display = 'none';
     } else {
         img.src = '';
-        img.classList.add('sem-foto');             // esconde a imagem
+        img.classList.add('sem-foto');
         if (placeholder) placeholder.style.display = 'flex';
     }
 }
@@ -242,7 +242,7 @@ window.rolarDanoAtaque = function(btn) {
     const nomeAtaque = box.querySelector('input[type="text"]')?.value || 'Ataque';
 
     if (danoSel === '0') {
-        mostrarResultadoDado(0, bonusDano, bonusDano);
+        mostrarResultadoDano(0, bonusDano, bonusDano);
         return;
     }
 
@@ -256,8 +256,23 @@ window.rolarDanoAtaque = function(btn) {
     }
 
     const total = resultado + bonusDano;
-    mostrarResultadoDado(resultado, bonusDano, total);
+    mostrarResultadoDano(resultado, bonusDano, total);
     registrarRolagemNoFirebase('Dano – ' + nomeAtaque, resultado, bonusDano, total);
+};
+
+// ─────────────────────────────────────────
+//  ROLAR INICIATIVA
+// ─────────────────────────────────────────
+window.rolarIniciativa = function() {
+    const cor    = parseInt(document.getElementById('coragem')?.value) || 0;
+    const iniB   = parseInt(document.getElementById('iniciativaBonus')?.value) || 0;
+    const totalIniciativa = 1 + cor + iniB;
+
+    const dado  = Math.floor(Math.random() * 6) + 1;
+    const total = dado + totalIniciativa;
+
+    mostrarResultadoDado(dado, totalIniciativa, total);
+    registrarRolagemNoFirebase('Iniciativa', dado, totalIniciativa, total);
 };
 
 // ─────────────────────────────────────────
@@ -304,11 +319,8 @@ async function salvarFichaFirebase() {
         valorRecompensa: document.getElementById('valorRecompensa').value,
         honraValor: document.getElementById('honraValor').value,
         modoDinamico: modoDinamico,
-        // Avatar — apenas URL, não armazenamos a imagem em si
         avatarUrl: document.getElementById('avatarUrl')?.value || '',
-        // Diário de sessão
         diarioSessao: document.getElementById('diarioSessao')?.value || '',
-        // Antecedentes
         combate: document.getElementById('combate').value,
         combateMod: document.getElementById('combateMod').value,
         negocios: document.getElementById('negocios').value,
@@ -333,14 +345,12 @@ async function salvarFichaFirebase() {
         domesticoMod: document.getElementById('domesticoMod').value,
         direcao: document.getElementById('direcao').value,
         direcaoMod: document.getElementById('direcaoMod').value,
-        // Montaria
         montariaNome: document.getElementById('montariaNome').value,
         montariaPV: document.getElementById('montariaPV').value,
         montariaPVMax: document.getElementById('montariaPVMax').value,
         montariaDanoBonus: document.getElementById('montariaDanoBonus').value,
         montariaPotencia: document.getElementById('montariaPotencia').value,
         montariaResistencia: document.getElementById('montariaResistencia').value,
-        // Listas
         ataques: extrairAtaques(),
         habilidades: extrairLista('habilidadesContainer'),
         inventario: extrairLista('inventarioContainer'),
@@ -366,11 +376,17 @@ function preencherCampos(ficha) {
     for (const key in ficha) {
         const el = document.getElementById(key);
         if (el && typeof ficha[key] !== 'object' && key !== 'modoDinamico') {
-            el.type === 'checkbox' ? (el.checked = ficha[key]) : (el.value = ficha[key]);
+            if (el.type === 'checkbox') {
+                el.checked = ficha[key];
+            } else if (key === 'valorRecompensa' && ficha[key]) {
+                const raw = String(ficha[key]).replace(/^R\$\s*/, '').trim();
+                el.value = raw ? 'R$ ' + raw : '';
+            } else {
+                el.value = ficha[key];
+            }
         }
     }
 
-    // Carregar avatar
     if (ficha.avatarUrl) {
         atualizarAvatar(ficha.avatarUrl);
     }
@@ -379,14 +395,12 @@ function preencherCampos(ficha) {
         atualizarPipsVisual(container, ficha[container.getAttribute('data-ant')] || 0);
     });
 
-    // Ataques
     document.getElementById('ataquesContainer').innerHTML = '';
     ficha.ataques?.forEach(a => {
         document.getElementById('ataquesContainer')
             .appendChild(criarEstruturaAtaque(a.nome, a.bonusAtk, a.dano, a.bonusDano));
     });
 
-    // Habilidades
     document.getElementById('habilidadesContainer').innerHTML = '';
     ficha.habilidades?.forEach(h => {
         adicionarHabilidade();
@@ -395,13 +409,11 @@ function preencherCampos(ficha) {
         div.querySelector('textarea').value = h.descricao;
     });
 
-    // Inventários
     document.getElementById('inventarioContainer').innerHTML = '';
     carregarListaItens(ficha.inventario, window.adicionarItem, 'inventarioContainer');
     document.getElementById('inventarioMontariaContainer').innerHTML = '';
     carregarListaItens(ficha.inventarioMontaria, window.adicionarItemMontaria, 'inventarioMontariaContainer');
 
-    // Modo dinâmico
     if (ficha.modoDinamico) {
         modoDinamico = false;
         window.toggleCombateDinamico();
@@ -478,6 +490,34 @@ function mostrarResultadoDado(dado, bonus, total) {
     setTimeout(() => document.addEventListener('click', fechar), 120);
 }
 
+function mostrarResultadoDano(dado, bonus, total) {
+    document.querySelectorAll('.dice-result').forEach(el => {
+        el.style.animation = 'diceOut 0.25s ease-out forwards';
+        setTimeout(() => el.remove(), 250);
+    });
+
+    const div = document.createElement('div');
+    div.className = 'dice-result';
+    div.style.animation = 'diceIn 0.35s ease-out forwards';
+
+    div.innerHTML = `
+        <div class="dice-result-header">Bônus: ${bonus} + Dado: ${dado}</div>
+        <div class="dice-result-total">${total}</div>
+        <div style="font-family:'Special Elite';font-size:0.25em;margin-top:20px;color:#8b6f47;letter-spacing:2px;">
+            CLIQUE EM QUALQUER LUGAR PARA FECHAR
+        </div>
+    `;
+
+    document.body.appendChild(div);
+
+    function fechar() {
+        div.style.animation = 'diceOut 0.3s ease-out forwards';
+        setTimeout(() => div.remove(), 300);
+        document.removeEventListener('click', fechar);
+    }
+    setTimeout(() => document.addEventListener('click', fechar), 120);
+}
+
 // ─────────────────────────────────────────
 //  UTILITÁRIOS
 // ─────────────────────────────────────────
@@ -495,7 +535,11 @@ function carregarListaItens(lista, fn, containerId) {
         div.querySelector('input').value = item.nome;
         const txt = div.querySelector('textarea');
         txt.value = item.descricao;
-        if (item.descricao) txt.style.display = 'block';
+        // Se tem descrição, expande o item
+        if (item.descricao) {
+            div.classList.add('inv-expandido');
+            txt.style.display = 'block';
+        }
     });
 }
 
@@ -519,20 +563,29 @@ window.atualizarHonra = function() {
     if (!input || !marker) return;
     const val  = Math.max(-15, Math.min(15, parseInt(input.value) || 0));
     const bar  = marker.parentElement;
-    const W    = bar.offsetWidth;   // largura total da barra
-    const mW   = 40;                // largura fixa da bolinha
-    // Mapeia [-15,+15] para [0, W-mW] em px:
-    //   val=-15 → left=0       (bolinha na borda esquerda, 100% dentro)
-    //   val= 0  → left=(W-mW)/2 (bolinha centrada)
-    //   val=+15 → left=W-mW   (bolinha na borda direita, 100% dentro)
+    const W    = bar.offsetWidth;
+    const mW   = 40;
     const left = ((val + 15) / 30) * (W - mW);
     marker.style.left      = left + 'px';
     marker.style.transform = 'translateY(-50%)';
 };
 
 window.toggleDescricao = (btn) => {
-    const txt = btn.parentElement.parentElement.querySelector('textarea');
-    txt.style.display = (txt.style.display === 'none') ? 'block' : 'none';
+    const itemBox = btn.closest('.inv-item');
+    const txt = itemBox.querySelector('textarea');
+    const isVisible = txt.style.display !== 'none' && txt.style.display !== '';
+    if (isVisible) {
+        txt.style.display = 'none';
+        itemBox.classList.remove('inv-expandido');
+        btn.textContent = '▸';
+        btn.title = 'Expandir';
+    } else {
+        txt.style.display = 'block';
+        itemBox.classList.add('inv-expandido');
+        btn.textContent = '▾';
+        btn.title = 'Recolher';
+        txt.focus();
+    }
 };
 
 let timeoutSalvar = null;
@@ -557,21 +610,28 @@ window.adicionarHabilidade = function() {
     document.getElementById('habilidadesContainer').appendChild(div);
 };
 
+// ── NOVO INVENTÁRIO COMPACTO ──────────────────────────────
 function adicionarEstruturaItem(container, placeholder) {
     const div = document.createElement('div');
-    div.className = 'item-box';
+    div.className = 'inv-item';
+
     div.innerHTML = `
-        <div class="item-header">
-            <input type="text" placeholder="${placeholder}">
-            <button class="btn btn-small" onclick="window.toggleDescricao(this)">📝</button>
-            <button class="btn btn-small btn-danger" onclick="this.parentElement.parentElement.remove(); window.triggerSalvar()">🗑️</button>
+        <div class="inv-row">
+            <button class="inv-expand-btn" onclick="window.toggleDescricao(this)" title="Expandir">▸</button>
+            <input type="text" class="inv-nome" placeholder="${placeholder}">
+            <button class="inv-del-btn" onclick="this.closest('.inv-item').remove(); window.triggerSalvar()" title="Remover">✕</button>
         </div>
-        <textarea placeholder="Descrição..." style="display:none;"></textarea>`;
+        <textarea class="inv-desc" placeholder="Detalhes e propriedades..." style="display:none;"></textarea>
+    `;
+
     container.appendChild(div);
+
+    // Foco automático no nome ao adicionar
+    setTimeout(() => div.querySelector('.inv-nome').focus(), 50);
 }
 
-window.adicionarItem = () => adicionarEstruturaItem(document.getElementById('inventarioContainer'), "Item");
-window.adicionarItemMontaria = () => adicionarEstruturaItem(document.getElementById('inventarioMontariaContainer'), "Equipamento");
+window.adicionarItem = () => adicionarEstruturaItem(document.getElementById('inventarioContainer'), "Nome do item...");
+window.adicionarItemMontaria = () => adicionarEstruturaItem(document.getElementById('inventarioMontariaContainer'), "Equipamento...");
 
 // ─────────────────────────────────────────
 //  OUTRAS FUNÇÕES
@@ -588,7 +648,7 @@ window.rolarDanoMontaria = function() {
     const pot    = parseInt(document.getElementById('montariaPotencia').value) || 0;
     const bonus  = parseInt(document.getElementById('montariaDanoBonus').value) || 0;
     const total  = dado + pot + bonus;
-    mostrarResultadoDado(dado, pot + bonus, total);
+    mostrarResultadoDano(dado, pot + bonus, total);
     registrarRolagemNoFirebase("Dano da Montaria", dado, pot + bonus, total);
 };
 
@@ -601,8 +661,71 @@ window.irParaBase = function() {
 // ─────────────────────────────────────────
 //  INICIALIZAÇÃO
 // ─────────────────────────────────────────
+// ─────────────────────────────────────────
+//  CAMPO VALOR RECOMPENSA (R$ livre)
+// ─────────────────────────────────────────
+function configurarCampoRecompensa() {
+    const el = document.getElementById('valorRecompensa');
+    if (!el) return;
+
+    const PREFIX = 'R$ ';
+
+    el.addEventListener('focus', () => {
+        if (!el.value.startsWith(PREFIX)) {
+            const raw = el.value.replace(/^R\$\s*/, '').trim();
+            el.value = PREFIX + raw;
+        }
+        setTimeout(() => {
+            const pos = el.value.length;
+            el.setSelectionRange(pos, pos);
+        }, 0);
+    });
+
+    el.addEventListener('keydown', (e) => {
+        const selStart = el.selectionStart;
+        const selEnd   = el.selectionEnd;
+        if (['Backspace', 'Delete'].includes(e.key)) {
+            if (selStart <= PREFIX.length && selEnd <= PREFIX.length) {
+                e.preventDefault();
+                return;
+            }
+            if (selStart < PREFIX.length) {
+                e.preventDefault();
+                el.setSelectionRange(PREFIX.length, selEnd);
+            }
+        }
+        if (e.key === 'Home' && !e.shiftKey) {
+            e.preventDefault();
+            el.setSelectionRange(PREFIX.length, PREFIX.length);
+        }
+    });
+
+    el.addEventListener('input', () => {
+        if (!el.value.startsWith(PREFIX)) {
+            const clean = el.value.replace(/^R\$\s*/, '');
+            el.value = PREFIX + clean;
+        }
+        if (el.selectionStart < PREFIX.length) {
+            el.setSelectionRange(PREFIX.length, PREFIX.length);
+        }
+    });
+
+    el.addEventListener('blur', () => {
+        if (el.value.trim() === 'R$' || el.value.trim() === 'R$ ') {
+            el.value = '';
+        }
+    });
+
+    el.addEventListener('click', () => {
+        if (el.selectionStart < PREFIX.length) {
+            el.setSelectionRange(PREFIX.length, PREFIX.length);
+        }
+    });
+}
+
 window.addEventListener('load', async () => {
     configurarPips();
+    configurarCampoRecompensa();
 
     const idSalvo = localStorage.getItem('idFichaAtual');
     if (idSalvo) {
@@ -624,8 +747,6 @@ window.addEventListener('load', async () => {
     });
 
     calcularValores();
-    // Chama duas vezes: uma imediata e uma após o browser pintar, garantindo que
-    // getBoundingClientRect() já retorna a largura real da barra
     atualizarHonra();
     setTimeout(atualizarHonra, 50);
 });

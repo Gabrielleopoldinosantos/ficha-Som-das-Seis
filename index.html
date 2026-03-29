@@ -12,8 +12,6 @@
     left: 0;
     transform: translateY(-50%);
   }
-
-  /* ── SAVE INDICATOR ── */
   .save-indicator {
     position: fixed;
     top: 16px;
@@ -83,7 +81,6 @@
   }
   .avatar-frame::before { clip-path: polygon(0 12px,12px 0,100% 0,100% 12px,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 calc(100% - 12px)); }
   .avatar-frame::after  { clip-path: polygon(12px 0,calc(100% - 12px) 0,100% 12px,100% calc(100% - 12px),calc(100% - 12px) 100%,12px 100%,0 calc(100% - 12px),0 12px); border-color: #5a4030; inset: -2px; }
-
   #avatarImg {
     width: 200px; height: 200px;
     object-fit: cover;
@@ -192,7 +189,6 @@
   body.combate-dinamico #iniciativaBox .combate-valor { display: none; }
   body.combate-dinamico #iniciativaBox .ini-bonus-wrap { display: none; }
   body.combate-dinamico #iniciativaBox .ini-dinamico { display: flex !important; }
-
   .ini-dinamico {
     display: none;
     flex-direction: column;
@@ -216,7 +212,6 @@
     letter-spacing: 1px;
     margin-top: 5px;
   }
-
   body.combate-dinamico .atk-btn-rolar-atk  { display: none !important; }
   body.combate-dinamico .atk-btn-rolar-dano { display: none !important; }
   body.combate-dinamico .atk-media-atk  { display: inline-flex !important; }
@@ -235,8 +230,6 @@
     white-space: nowrap;
   }
   .atk-media-dano { border-color: #4682b4; color: #87ceeb; }
-
-  /* ── ATAQUES ── */
   .ataque-box {
     background: #0f0d0b;
     border: 1px solid #3d2f24;
@@ -390,8 +383,6 @@
     border-color: #b8860b;
     color: #ffd700;
   }
-
-  /* ── ANIMAÇÕES POPUP ── */
   @keyframes diceIn {
     from { opacity: 0; transform: translate(-50%,-50%) scale(0.6) rotate(-15deg); }
     to   { opacity: 1; transform: translate(-50%,-50%) scale(1) rotate(0deg); }
@@ -459,7 +450,6 @@
       <button class="avatar-edit-btn" onclick="window.abrirInputAvatar()">alterar</button>
       <input type="hidden" id="avatarUrl">
      </div>
-
     </div>
    </div>
 
@@ -467,7 +457,6 @@
    <div class="secao secao-ampla">
     <div class="secao-header">Atributos</div>
     <div class="atributos-grid" style="grid-template-columns:repeat(4,1fr);">
-
      <div class="atributo-box">
       <label>Físico</label>
       <div class="dice-container">
@@ -476,7 +465,6 @@
        <span class="media-badge" id="mediaFisico">—</span>
       </div>
      </div>
-
      <div class="atributo-box">
       <label>Agilidade</label>
       <div class="dice-container">
@@ -485,7 +473,6 @@
        <span class="media-badge" id="mediaAgilidade">—</span>
       </div>
      </div>
-
      <div class="atributo-box">
       <label>Intelecto</label>
       <div class="dice-container">
@@ -494,7 +481,6 @@
        <span class="media-badge" id="mediaIntelecto">—</span>
       </div>
      </div>
-
      <div class="atributo-box">
       <label>Coragem</label>
       <div class="dice-container">
@@ -503,7 +489,6 @@
        <span class="media-badge" id="mediaCoragem">—</span>
       </div>
      </div>
-
     </div>
    </div>
 
@@ -550,7 +535,7 @@
       <div class="combate-valor" id="iniciativaTotal">1</div>
       <div class="ini-bonus-wrap" style="margin-top:10px;">
        <input type="number" id="iniciativaBonus" value="0" placeholder="+Bônus" oninput="calcularValores()">
-       <button class="btn-dice btn-dice-normal" onclick="rolarDado('iniciativaBonus')" title="Rolar 1d6" style="width:100%;margin-top:5px;padding:6px;">🎲</button>
+       <button class="btn-dice btn-dice-normal" onclick="rolarIniciativa()" title="Rolar Iniciativa" style="width:100%;margin-top:5px;padding:6px;">🎲</button>
       </div>
       <div class="ini-dinamico">
        <div class="ini-valor" id="iniciativaDinamica">—</div>
@@ -624,11 +609,11 @@
     <div id="habilidadesContainer" class="lista-items"></div>
    </div>
 
-   <!-- INVENTÁRIO -->
+   <!-- INVENTÁRIO — botão movido para baixo do container -->
    <div class="secao secao-ampla">
     <div class="secao-header">Inventário</div>
-    <button class="btn btn-small" onclick="adicionarItem()">+ Adicionar Item</button>
     <div id="inventarioContainer" class="lista-items"></div>
+    <button class="btn btn-small" onclick="adicionarItem()" style="margin-top:10px;">+ Adicionar Item</button>
    </div>
 
    <!-- RECOMPENSAS -->
@@ -636,8 +621,8 @@
     <div class="secao-header">Recompensas</div>
     <div class="campo">
      <textarea id="recompensas" placeholder="Descreva as recompensas e conquistas do personagem..."></textarea>
-     <label style="margin-top:10px;">Valor da Recompensa (R$)</label>
-     <input type="number" id="valorRecompensa" value="0" min="0" style="margin-top:5px;">
+     <label style="margin-top:10px;">Valor da Recompensa</label>
+     <input type="text" id="valorRecompensa" value="0" min="0" style="margin-top:5px;">
     </div>
    </div>
 
@@ -660,9 +645,8 @@
    <div class="secao diario-secao">
     <div class="secao-header">Diário</div>
     <div class="campo" style="padding: 5px 0;">
-     <label>NOTAS RÁPIDAS</label> 
-     <textarea id="diarioSessao"
-      placeholder="Estas notas ficam salvas junto com sua ficha."></textarea>
+     <label>NOTAS RÁPIDAS</label>
+     <textarea id="diarioSessao" placeholder="Estas notas ficam salvas junto com sua ficha."></textarea>
      <div class="diario-timestamp" id="diarioTimestamp"></div>
     </div>
    </div>
@@ -716,8 +700,8 @@
     </div>
     <div class="montaria-inventario">
      <div class="secao-header-mini">Inventário da Montaria</div>
-     <button class="btn btn-small" onclick="adicionarItemMontaria()">+ Adicionar Item</button>
      <div id="inventarioMontariaContainer" class="lista-items"></div>
+     <button class="btn btn-small" onclick="adicionarItemMontaria()" style="margin-top:10px;">+ Adicionar Item</button>
     </div>
    </div>
   </div>

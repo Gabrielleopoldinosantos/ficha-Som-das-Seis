@@ -1,4 +1,4 @@
-    * {
+* {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
@@ -788,9 +788,6 @@
 }
 
 
-
-
-
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
     -webkit-appearance: inner-spin-button !important;
@@ -939,3 +936,223 @@ body {
     margin: 0;
 }
 
+
+/* ═══════════════════════════════════════════════════════
+   INVENTÁRIO COMPACTO — estilo registro de cartório
+   ═══════════════════════════════════════════════════════ */
+
+/* Container geral */
+#inventarioContainer,
+#inventarioMontariaContainer,
+#armazemContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+/* Cada item do inventário */
+.inv-item {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(90, 74, 58, 0.4);
+    transition: background 0.15s ease;
+    overflow: hidden;
+}
+
+.inv-item:first-child {
+    border-top: 1px solid rgba(90, 74, 58, 0.4);
+}
+
+.inv-item:hover {
+    background: rgba(139, 111, 71, 0.07);
+}
+
+/* Linha principal do item */
+.inv-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    height: 32px;
+}
+
+/* Botão de expandir ▸ / ▾ */
+.inv-expand-btn {
+    flex-shrink: 0;
+    width: 22px;
+    height: 100%;
+    background: none;
+    border: none;
+    color: #5a4a3a;
+    font-size: 0.75em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.15s, transform 0.15s;
+    padding: 0;
+    line-height: 1;
+}
+
+.inv-expand-btn:hover {
+    color: #d4a574;
+}
+
+.inv-item.inv-expandido .inv-expand-btn {
+    color: #b8860b;
+}
+
+/* Input do nome — sem bordas visíveis, parece texto */
+.inv-nome {
+    flex: 1;
+    height: 100%;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    color: #c9a96e !important;
+    font-family: 'Special Elite', monospace;
+    font-size: 0.88em;
+    letter-spacing: 0.5px;
+    padding: 0 6px !important;
+    box-shadow: none !important;
+    transition: color 0.15s;
+    display: block;
+    width: 100%;
+}
+
+.inv-nome:focus {
+    color: #e8dcc0 !important;
+    background: rgba(139, 111, 71, 0.05) !important;
+    border-bottom: 1px solid #8b6f47 !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.inv-nome::placeholder {
+    color: #3d2f24;
+    font-style: italic;
+}
+
+/* Botão de deletar */
+.inv-del-btn {
+    flex-shrink: 0;
+    width: 24px;
+    height: 100%;
+    background: none;
+    border: none;
+    color: #3d2822;
+    font-size: 0.7em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.15s, background 0.15s;
+    padding: 0;
+    border-radius: 0;
+}
+
+.inv-del-btn:hover {
+    color: #c04040;
+    background: rgba(139, 50, 50, 0.15);
+}
+
+/* Textarea de descrição — aparece ao expandir */
+.inv-desc {
+    width: 100%;
+    min-height: 52px;
+    max-height: 140px;
+    background: rgba(0, 0, 0, 0.25) !important;
+    border: none !important;
+    border-top: 1px dashed rgba(90, 74, 58, 0.5) !important;
+    border-radius: 0 !important;
+    color: #a09070 !important;
+    font-family: 'Special Elite', monospace;
+    font-size: 0.8em;
+    line-height: 1.5;
+    padding: 6px 28px 6px 28px !important;
+    resize: vertical;
+    box-shadow: none !important;
+    transition: none;
+    display: none;
+}
+
+.inv-desc:focus {
+    border-color: rgba(139, 111, 71, 0.6) !important;
+    color: #c9a96e !important;
+    background: rgba(0, 0, 0, 0.35) !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.inv-desc::placeholder {
+    color: #3d2f24;
+    font-style: italic;
+}
+
+/* Handle de resize customizado */
+.inv-desc::-webkit-resizer {
+    background-image:
+        linear-gradient(135deg,
+            transparent 0%, transparent 40%,
+            #8b6f47 40%, #8b6f47 45%,
+            transparent 45%, transparent 55%,
+            #8b6f47 55%, #8b6f47 60%,
+            transparent 60%, transparent 70%,
+            #8b6f47 70%, #8b6f47 75%,
+            transparent 75%
+        );
+    border: none;
+    cursor: se-resize;
+}
+
+/* Animação suave ao expandir */
+.inv-item.inv-expandido .inv-desc {
+    animation: inv-slide-down 0.18s ease-out;
+}
+
+@keyframes inv-slide-down {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Contador de itens: exibido via CSS counter */
+#inventarioContainer,
+#inventarioMontariaContainer {
+    counter-reset: inv-counter;
+}
+
+.inv-item {
+    counter-increment: inv-counter;
+}
+
+/* Linha numerada à esquerda do expand-btn */
+.inv-expand-btn::before {
+    content: counter(inv-counter);
+    position: absolute;
+    left: 0;
+    font-size: 0.6em;
+    color: #3d2f24;
+    width: 14px;
+    text-align: right;
+    pointer-events: none;
+    line-height: 1;
+    font-family: monospace;
+}
+
+.inv-expand-btn {
+    position: relative;
+    padding-left: 16px;
+    width: 30px;
+}
+
+/* ── CAMPO VALOR RECOMPENSA ── */
+#valorRecompensa {
+    font-family: 'Special Elite', monospace;
+    letter-spacing: 1px;
+    color: #d4a574 !important;
+    border-color: #8b6f47 !important;
+}
+
+#valorRecompensa:focus {
+    border-color: #d4a574 !important;
+    box-shadow: 0 0 8px rgba(184, 134, 11, 0.3) !important;
+}
