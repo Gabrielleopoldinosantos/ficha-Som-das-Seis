@@ -521,14 +521,21 @@ function mostrarResultadoDano(dado, bonus, total) {
 // ─────────────────────────────────────────
 //  UTILITÁRIOS
 // ─────────────────────────────────────────
+
+// CORREÇÃO PRINCIPAL: lê corretamente o estado expandido checando
+// tanto a classe CSS quanto o display inline da textarea
 function extrairLista(containerId) {
     return Array.from(document.getElementById(containerId).children).map(div => ({
         nome:      div.querySelector('input').value,
         descricao: div.querySelector('textarea').value,
-        expandido: div.classList.contains('inv-expandido')
+        // Considera expandido se a classe estiver presente OU se o display não for 'none'
+        expandido: div.classList.contains('inv-expandido') ||
+                   (div.querySelector('textarea')?.style.display === 'block')
     }));
 }
 
+// CORREÇÃO PRINCIPAL: restaura o ícone do botão (▸/▾) junto com
+// a visibilidade da textarea e a classe inv-expandido
 function carregarListaItens(lista, fn, containerId) {
     lista?.forEach(item => {
         fn();
@@ -536,12 +543,28 @@ function carregarListaItens(lista, fn, containerId) {
         div.querySelector('input').value = item.nome;
         const txt = div.querySelector('textarea');
         txt.value = item.descricao;
-        // Restaura o estado exato que o usuário deixou
+
         if (item.expandido) {
-            div.classList.add('inv-expandido');
+            // Expande a descrição
             txt.style.display = 'block';
+            div.classList.add('inv-expandido');
+
+            // Atualiza o botão para o ícone de recolhido (▾)
             const btn = div.querySelector('.inv-expand-btn');
-            if (btn) { btn.textContent = '▾'; btn.title = 'Recolher'; }
+            if (btn) {
+                btn.textContent = '▾';
+                btn.title = 'Recolher';
+            }
+        } else {
+            // Garante que esteja recolhido (estado padrão)
+            txt.style.display = 'none';
+            div.classList.remove('inv-expandido');
+
+            const btn = div.querySelector('.inv-expand-btn');
+            if (btn) {
+                btn.textContent = '▸';
+                btn.title = 'Expandir';
+            }
         }
     });
 }
@@ -573,6 +596,8 @@ window.atualizarHonra = function() {
     marker.style.transform = 'translateY(-50%)';
 };
 
+// CORREÇÃO: toggleDescricao agora também dispara o salvamento automático
+// para que a mudança de estado seja persistida imediatamente
 window.toggleDescricao = (btn) => {
     const itemBox = btn.closest('.inv-item');
     const txt = itemBox.querySelector('textarea');
@@ -589,6 +614,8 @@ window.toggleDescricao = (btn) => {
         btn.title = 'Recolher';
         txt.focus();
     }
+    // Salva o novo estado expandido/recolhido automaticamente
+    autoSalvar();
 };
 
 let timeoutSalvar = null;
@@ -613,7 +640,7 @@ window.adicionarHabilidade = function() {
     document.getElementById('habilidadesContainer').appendChild(div);
 };
 
-// ── NOVO INVENTÁRIO COMPACTO ──────────────────────────────
+// ── INVENTÁRIO COMPACTO ───────────────────────────────────
 function adicionarEstruturaItem(container, placeholder) {
     const div = document.createElement('div');
     div.className = 'inv-item';
@@ -661,9 +688,6 @@ window.irParaBase = function() {
     setTimeout(() => { window.location.href = 'base.html'; }, 500);
 };
 
-// ─────────────────────────────────────────
-//  INICIALIZAÇÃO
-// ─────────────────────────────────────────
 // ─────────────────────────────────────────
 //  CAMPO VALOR RECOMPENSA (R$ livre)
 // ─────────────────────────────────────────
@@ -726,6 +750,9 @@ function configurarCampoRecompensa() {
     });
 }
 
+// ─────────────────────────────────────────
+//  INICIALIZAÇÃO
+// ─────────────────────────────────────────
 window.addEventListener('load', async () => {
     configurarPips();
     configurarCampoRecompensa();
