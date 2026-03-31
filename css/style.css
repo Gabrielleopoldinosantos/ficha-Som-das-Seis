@@ -978,12 +978,12 @@ body {
 /* Botão de expandir ▸ / ▾ */
 .inv-expand-btn {
     flex-shrink: 0;
-    width: 22px;
+    width: 28px;
     height: 100%;
     background: none;
     border: none;
-    color: #5a4a3a;
-    font-size: 0.75em;
+    color: #7a6a5a;
+    font-size: 1.5em;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -1140,8 +1140,8 @@ body {
 
 .inv-expand-btn {
     position: relative;
-    padding-left: 16px;
-    width: 30px;
+    padding-left: 18px;
+    width: 34px;
 }
 
 /* ── CAMPO VALOR RECOMPENSA ── */

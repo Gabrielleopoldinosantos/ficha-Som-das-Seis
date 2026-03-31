@@ -523,8 +523,9 @@ function mostrarResultadoDano(dado, bonus, total) {
 // ─────────────────────────────────────────
 function extrairLista(containerId) {
     return Array.from(document.getElementById(containerId).children).map(div => ({
-        nome:     div.querySelector('input').value,
-        descricao: div.querySelector('textarea').value
+        nome:      div.querySelector('input').value,
+        descricao: div.querySelector('textarea').value,
+        expandido: div.classList.contains('inv-expandido')
     }));
 }
 
@@ -535,10 +536,12 @@ function carregarListaItens(lista, fn, containerId) {
         div.querySelector('input').value = item.nome;
         const txt = div.querySelector('textarea');
         txt.value = item.descricao;
-        // Se tem descrição, expande o item
-        if (item.descricao) {
+        // Restaura o estado exato que o usuário deixou
+        if (item.expandido) {
             div.classList.add('inv-expandido');
             txt.style.display = 'block';
+            const btn = div.querySelector('.inv-expand-btn');
+            if (btn) { btn.textContent = '▾'; btn.title = 'Recolher'; }
         }
     });
 }
