@@ -521,21 +521,15 @@ function mostrarResultadoDano(dado, bonus, total) {
 // ─────────────────────────────────────────
 //  UTILITÁRIOS
 // ─────────────────────────────────────────
-
-// CORREÇÃO PRINCIPAL: lê corretamente o estado expandido checando
-// tanto a classe CSS quanto o display inline da textarea
 function extrairLista(containerId) {
     return Array.from(document.getElementById(containerId).children).map(div => ({
         nome:      div.querySelector('input').value,
         descricao: div.querySelector('textarea').value,
-        // Considera expandido se a classe estiver presente OU se o display não for 'none'
         expandido: div.classList.contains('inv-expandido') ||
                    (div.querySelector('textarea')?.style.display === 'block')
     }));
 }
 
-// CORREÇÃO PRINCIPAL: restaura o ícone do botão (▸/▾) junto com
-// a visibilidade da textarea e a classe inv-expandido
 function carregarListaItens(lista, fn, containerId) {
     lista?.forEach(item => {
         fn();
@@ -545,26 +539,15 @@ function carregarListaItens(lista, fn, containerId) {
         txt.value = item.descricao;
 
         if (item.expandido) {
-            // Expande a descrição
             txt.style.display = 'block';
             div.classList.add('inv-expandido');
-
-            // Atualiza o botão para o ícone de recolhido (▾)
             const btn = div.querySelector('.inv-expand-btn');
-            if (btn) {
-                btn.textContent = '▾';
-                btn.title = 'Recolher';
-            }
+            if (btn) { btn.textContent = '▾'; btn.title = 'Recolher'; }
         } else {
-            // Garante que esteja recolhido (estado padrão)
             txt.style.display = 'none';
             div.classList.remove('inv-expandido');
-
             const btn = div.querySelector('.inv-expand-btn');
-            if (btn) {
-                btn.textContent = '▸';
-                btn.title = 'Expandir';
-            }
+            if (btn) { btn.textContent = '▸'; btn.title = 'Expandir'; }
         }
     });
 }
@@ -596,8 +579,6 @@ window.atualizarHonra = function() {
     marker.style.transform = 'translateY(-50%)';
 };
 
-// CORREÇÃO: toggleDescricao agora também dispara o salvamento automático
-// para que a mudança de estado seja persistida imediatamente
 window.toggleDescricao = (btn) => {
     const itemBox = btn.closest('.inv-item');
     const txt = itemBox.querySelector('textarea');
@@ -614,7 +595,6 @@ window.toggleDescricao = (btn) => {
         btn.title = 'Recolher';
         txt.focus();
     }
-    // Salva o novo estado expandido/recolhido automaticamente
     autoSalvar();
 };
 
@@ -626,6 +606,206 @@ function autoSalvar() {
     timeoutSalvar = setTimeout(() => salvarFichaFirebase(), 1500);
 }
 window.triggerSalvar = autoSalvar;
+
+// ─────────────────────────────────────────
+//  DRAG-AND-DROP PARA REORDENAR INVENTÁRIO
+// ─────────────────────────────────────────
+
+// Estado do drag
+let dragSrc = null;         // o elemento sendo arrastado
+let dragContainer = null;   // o container pai
+let dropIndicator = null;   // linha indicadora de posição
+
+function criarDropIndicator() {
+    const el = document.createElement('div');
+    el.id = 'inv-drop-indicator';
+    el.style.cssText = `
+        height: 2px;
+        background: #b8860b;
+        box-shadow: 0 0 6px rgba(184,134,11,0.8);
+        margin: 0;
+        border-radius: 1px;
+        pointer-events: none;
+        display: none;
+    `;
+    return el;
+}
+
+function habilitarDragDrop(container) {
+    // Usa MutationObserver para reconfigurar quando novos itens forem adicionados
+    const observer = new MutationObserver(() => configurarDragItens(container));
+    observer.observe(container, { childList: true });
+    configurarDragItens(container);
+}
+
+function configurarDragItens(container) {
+    Array.from(container.children).forEach(item => {
+        if (item.dataset.dragConfigured) return;
+        item.dataset.dragConfigured = 'true';
+
+        // Torna o item arrastável
+        item.setAttribute('draggable', 'true');
+
+        // Handle visual (ícone de arrastar) — inserido no inv-row se ainda não existe
+        const row = item.querySelector('.inv-row');
+        if (row && !row.querySelector('.inv-drag-handle')) {
+            const handle = document.createElement('span');
+            handle.className = 'inv-drag-handle';
+            handle.innerHTML = '⠿';
+            handle.title = 'Arrastar para reordenar';
+            handle.style.cssText = `
+                flex-shrink: 0;
+                width: 18px;
+                color: #3d2f24;
+                font-size: 1em;
+                cursor: grab;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                user-select: none;
+                transition: color 0.15s;
+                padding: 0 2px;
+                line-height: 1;
+            `;
+            handle.addEventListener('mouseenter', () => handle.style.color = '#8b6f47');
+            handle.addEventListener('mouseleave', () => handle.style.color = dragSrc === item ? '#b8860b' : '#3d2f24');
+            // Insere o handle como primeiro filho do inv-row
+            row.insertBefore(handle, row.firstChild);
+        }
+
+        // Drag events
+        item.addEventListener('dragstart', onDragStart);
+        item.addEventListener('dragend',   onDragEnd);
+        item.addEventListener('dragover',  onDragOver);
+        item.addEventListener('dragleave', onDragLeave);
+        item.addEventListener('drop',      onDrop);
+    });
+}
+
+function onDragStart(e) {
+    // Impede drag se clicar em elementos interativos (input, textarea, button)
+    if (e.target.closest('input, textarea, button')) {
+        e.preventDefault();
+        return;
+    }
+
+    dragSrc = this;
+    dragContainer = this.parentElement;
+
+    // Estilo visual no item sendo arrastado
+    setTimeout(() => {
+        dragSrc.style.opacity = '0.4';
+        dragSrc.style.outline = '1px dashed #b8860b';
+    }, 0);
+
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', ''); // necessário para Firefox
+
+    // Criar e inserir o indicador de drop se ainda não existir
+    if (!dropIndicator) {
+        dropIndicator = criarDropIndicator();
+        document.body.appendChild(dropIndicator);
+    }
+}
+
+function onDragEnd() {
+    if (dragSrc) {
+        dragSrc.style.opacity = '';
+        dragSrc.style.outline = '';
+
+        // Remove o handle de cor diferente
+        const handle = dragSrc.querySelector('.inv-drag-handle');
+        if (handle) handle.style.color = '#3d2f24';
+    }
+
+    // Esconde o indicador e limpa o estado
+    if (dropIndicator) dropIndicator.style.display = 'none';
+
+    // Remove highlight de todos os itens
+    if (dragContainer) {
+        Array.from(dragContainer.children).forEach(c => {
+            c.style.background = '';
+        });
+    }
+
+    dragSrc = null;
+    dragContainer = null;
+}
+
+function onDragOver(e) {
+    if (!dragSrc || this === dragSrc) return;
+    if (this.parentElement !== dragContainer) return;
+
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+
+    // Determina se o cursor está na metade superior ou inferior do item
+    const rect = this.getBoundingClientRect();
+    const meio = rect.top + rect.height / 2;
+    const depois = e.clientY > meio;
+
+    // Posiciona o indicador de drop
+    const containerRect = dragContainer.getBoundingClientRect();
+    dropIndicator.style.display = 'block';
+    dropIndicator.style.position = 'fixed';
+    dropIndicator.style.left = containerRect.left + 'px';
+    dropIndicator.style.width = containerRect.width + 'px';
+    dropIndicator.style.zIndex = '9999';
+
+    if (depois) {
+        // Após o elemento alvo
+        const bottom = rect.bottom;
+        dropIndicator.style.top = (bottom - 1) + 'px';
+        this.dataset.dropPosition = 'after';
+    } else {
+        // Antes do elemento alvo
+        dropIndicator.style.top = (rect.top - 1) + 'px';
+        this.dataset.dropPosition = 'before';
+    }
+
+    // Highlight sutil no alvo
+    Array.from(dragContainer.children).forEach(c => c.style.background = '');
+    this.style.background = 'rgba(184,134,11,0.06)';
+}
+
+function onDragLeave() {
+    this.style.background = '';
+    delete this.dataset.dropPosition;
+}
+
+function onDrop(e) {
+    if (!dragSrc || this === dragSrc) return;
+    if (this.parentElement !== dragContainer) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const position = this.dataset.dropPosition || 'before';
+
+    if (position === 'before') {
+        dragContainer.insertBefore(dragSrc, this);
+    } else {
+        // Inserir após 'this'
+        const next = this.nextSibling;
+        if (next) {
+            dragContainer.insertBefore(dragSrc, next);
+        } else {
+            dragContainer.appendChild(dragSrc);
+        }
+    }
+
+    this.style.background = '';
+    delete this.dataset.dropPosition;
+
+    // Salva imediatamente após reordenar
+    mostrarStatusSalvamento('saving');
+    salvarFichaFirebase().then(() => {
+        mostrarStatusSalvamento('saved');
+    }).catch((e) => {
+        console.error("Erro ao salvar:", e);
+        mostrarStatusSalvamento('error');
+    });
+}
 
 // ─────────────────────────────────────────
 //  LISTAS
@@ -655,8 +835,6 @@ function adicionarEstruturaItem(container, placeholder) {
     `;
 
     container.appendChild(div);
-
-    // Foco automático no nome ao adicionar
     setTimeout(() => div.querySelector('.inv-nome').focus(), 50);
 }
 
@@ -756,6 +934,10 @@ function configurarCampoRecompensa() {
 window.addEventListener('load', async () => {
     configurarPips();
     configurarCampoRecompensa();
+
+    // Ativa drag-and-drop nos dois containers de inventário
+    habilitarDragDrop(document.getElementById('inventarioContainer'));
+    habilitarDragDrop(document.getElementById('inventarioMontariaContainer'));
 
     const idSalvo = localStorage.getItem('idFichaAtual');
     if (idSalvo) {

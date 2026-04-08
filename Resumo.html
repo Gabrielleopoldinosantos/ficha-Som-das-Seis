@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resumo das Fichas - O Som das Seis</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rye&family=Special+Elite&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --gold:      #b8860b;
+            --gold-lt:   #d4a574;
+            --gold-dk:   #8b6f47;
+            --bg:        #0a0908;
+            --bg3:       #1a1714;
+            --bg4:       #211e1a;
+            --bg5:       #141210;
+            --border:    #3d2f24;
+            --border2:   #5a4a3a;
+            --text:      #e8dcc0;
+            --text2:     #c9a96e;
+            --text3:     #a09080;
+            --red:       #ff4444;
+            --red-dk:    #8b3a3a;
+            --blue:      #87ceeb;
+            --blue-dk:   #4682b4;
+            --purple:    #c8a2d0;
+            --purple-dk: #6b4a7a;
+            --green:     #7abf7a;
+            --green-dk:  #3a6a3a;
+        }
+
+        body {
+            background: var(--bg);
+            background-image: radial-gradient(circle at 2px 2px, rgba(139,111,71,0.04) 1px, transparent 0);
+            background-size: 28px 28px;
+            color: var(--text);
+            font-family: 'Special Elite', monospace;
+            min-height: 100vh;
+        }
+
+        /* ══ HEADER FIXO ══════════════════════════════════ */
+        .page-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 18px;
+            border-bottom: 2px solid var(--border);
+            background: rgba(10,9,8,0.97);
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            backdrop-filter: blur(4px);
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            background: var(--bg3);
+            border: 1px solid var(--border2);
+            color: var(--text2);
+            font-family: 'Special Elite', monospace;
+            font-size: 0.72em;
+            letter-spacing: 1px;
+            padding: 6px 11px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+            transition: border-color 0.2s, color 0.2s;
+            flex-shrink: 0;
+        }
+        .nav-btn:hover { border-color: var(--gold-lt); color: var(--gold-lt); }
+
+        .header-title {
+            font-family: 'Rye', cursive;
+            font-size: 1.3em;
+            color: var(--gold);
+            text-shadow: 2px 2px 0 #3d2f24;
+            letter-spacing: 3px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .search-wrap {
+            flex: 1;
+            position: relative;
+            min-width: 160px;
+            max-width: 400px;
+        }
+        .search-icon {
+            position: absolute;
+            left: 9px; top: 50%;
+            transform: translateY(-50%);
+            color: var(--border2);
+            font-size: 0.8em;
+            pointer-events: none;
+        }
+        #searchInput {
+            width: 100%;
+            background: var(--bg5);
+            border: 1px solid var(--border2);
+            color: var(--text);
+            font-family: 'Special Elite', monospace;
+            font-size: 0.8em;
+            padding: 7px 10px 7px 28px;
+            letter-spacing: 1px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        #searchInput::placeholder { color: var(--border2); font-style: italic; }
+        #searchInput:focus { border-color: var(--gold); }
+
+        .header-controls { display: flex; gap: 6px; flex-shrink: 0; }
+        .ctrl-btn {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            color: var(--text3);
+            font-family: 'Special Elite', monospace;
+            font-size: 0.68em;
+            letter-spacing: 1px;
+            padding: 6px 10px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        .ctrl-btn:hover { border-color: var(--gold-dk); color: var(--gold-lt); }
+
+        .status-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+        .status-dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 6px var(--green);
+            animation: pdot 1.5s ease-in-out infinite alternate;
+        }
+        @keyframes pdot { from { opacity:.5; transform:scale(.8); } to { opacity:1; transform:scale(1.2); } }
+        #statusTxt { font-size: 0.67em; color: var(--text3); letter-spacing: 1px; white-space: nowrap; }
+
+        /* ══ LISTA ════════════════════════════════════════ */
+        .fichas-list {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 18px 18px 60px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        /* ══ CARD ═════════════════════════════════════════ */
+        .ficha-card {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--border);
+            overflow: hidden;
+            transition: border-color 0.15s, border-left-color 0.15s;
+        }
+        .ficha-card:hover          { border-left-color: var(--gold-dk); }
+        .ficha-card.expandido      { border-left-color: var(--gold); border-color: var(--border2); }
+        .ficha-card.hidden-filter  { display: none; }
+
+        /* ── HEADER do card ── */
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 13px;
+            cursor: pointer;
+            user-select: none;
+            background: linear-gradient(90deg, rgba(61,47,36,0.3) 0%, transparent 55%);
+            transition: background 0.15s;
+        }
+        .card-header:hover { background: linear-gradient(90deg, rgba(61,47,36,0.55) 0%, rgba(61,47,36,0.08) 100%); }
+
+        .card-avatar {
+            width: 36px; height: 36px;
+            border: 1px solid var(--border2);
+            object-fit: cover;
+            flex-shrink: 0;
+            background: #0f0d0a;
+        }
+        .card-avatar-ph {
+            width: 36px; height: 36px;
+            border: 1px solid var(--border);
+            background: #0f0d0a;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1em;
+            flex-shrink: 0;
+            color: var(--border2);
+        }
+
+        .card-nome-block { flex: 1; min-width: 0; }
+        .card-nome {
+            font-family: 'Rye', cursive;
+            font-size: 1em;
+            color: var(--gold-lt);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .card-sub {
+            font-size: 0.62em;
+            color: var(--text3);
+            letter-spacing: 1px;
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-mini {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .mini-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1px;
+        }
+        .mini-lbl { font-size: 0.56em; color: var(--text3); letter-spacing: 1px; }
+        .mini-val { font-size: 0.8em; color: var(--text2); font-family: 'Rye', cursive; }
+        .mini-pv  { color: var(--red) !important; }
+
+        .mini-barra {
+            width: 46px; height: 3px;
+            background: #220000;
+            border: 1px solid var(--red-dk);
+            overflow: hidden;
+            margin-top: 1px;
+        }
+        .mini-fill { height: 100%; background: var(--red); }
+
+        .mini-div { width: 1px; height: 24px; background: var(--border); }
+
+        .mini-dinheiro {
+            font-family: 'Rye', cursive;
+            font-size: 0.78em;
+            color: var(--gold);
+        }
+        .mini-badges { display: flex; gap: 3px; }
+        .mbadge {
+            font-size: 0.7em;
+            padding: 1px 5px;
+            border-radius: 2px;
+        }
+        .mbadge-ok  { background: rgba(50,100,50,0.2); border: 1px solid var(--green-dk); color: var(--green); }
+        .mbadge-bad { background: rgba(100,30,30,0.2); border: 1px solid #6a3a3a; color: #bf7a7a; }
+
+        .card-chevron {
+            color: var(--border2);
+            font-size: 0.8em;
+            transition: transform 0.22s ease, color 0.15s;
+            flex-shrink: 0;
+            margin-left: 2px;
+        }
+        .ficha-card.expandido .card-chevron { transform: rotate(90deg); color: var(--gold); }
+
+        /* ── CORPO recolhível ── */
+        .card-body {
+            display: none;
+            border-top: 1px solid var(--border);
+        }
+        .ficha-card.expandido .card-body { display: block; animation: bIn .18s ease-out; }
+        @keyframes bIn { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:translateY(0); } }
+
+        /* ── SEÇÕES internas ── */
+        .cs {
+            padding: 9px 15px;
+            border-bottom: 1px solid rgba(61,47,36,0.35);
+        }
+        .cs:last-child { border-bottom: none; }
+
+        .cs-lbl {
+            font-size: 0.58em;
+            color: var(--gold-dk);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .cs-lbl::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,var(--border),transparent); }
+
+        /* Atributos */
+        .atrib-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:4px; }
+        .ab { background:var(--bg4); border:1px solid var(--border); text-align:center; padding:5px 3px; }
+        .ab-l { font-size:.56em; color:var(--text3); letter-spacing:1px; text-transform:uppercase; display:block; margin-bottom:2px; }
+        .ab-v { font-family:'Rye',cursive; font-size:1.1em; color:var(--gold-lt); }
+
+        /* Combate */
+        .combate-row { display:flex; gap:5px; }
+        .cb { flex:1; background:var(--bg4); border:1px solid var(--border); text-align:center; padding:6px; }
+        .cb-l { font-size:.56em; color:var(--text3); letter-spacing:2px; display:block; margin-bottom:3px; }
+        .cb-v { font-family:'Rye',cursive; font-size:1.4em; color:var(--gold-lt); }
+
+        /* Tormento */
+        .tormento-txt { font-style:italic; color:var(--purple); font-size:.83em; line-height:1.5; padding:5px 9px; background:rgba(107,74,122,.08); border-left:3px solid var(--purple-dk); }
+
+        /* Antecedentes */
+        .ant-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:3px; }
+        .ant-item { background:var(--bg4); border:1px solid var(--border); padding:4px 7px; display:flex; align-items:center; justify-content:space-between; gap:3px; }
+        .ant-n { font-size:.62em; color:var(--text3); letter-spacing:.5px; text-transform:uppercase; }
+        .ant-r { display:flex; align-items:center; gap:3px; flex-shrink:0; }
+        .ant-pips { display:flex; gap:2px; }
+        .ant-pip { width:6px; height:6px; border:1px solid var(--border2); background:var(--bg); }
+        .ant-pip.on { background:var(--gold); border-color:var(--gold-lt); box-shadow:0 0 3px rgba(184,134,11,.4); }
+        .ant-mod { font-size:.6em; color:var(--gold-lt); border:1px solid var(--gold-dk); background:rgba(184,134,11,.07); padding:1px 4px; min-width:18px; text-align:center; }
+
+        /* Ataques */
+        .atk-item { display:flex; align-items:center; gap:6px; padding:4px 0; border-bottom:1px dashed rgba(61,47,36,.3); }
+        .atk-item:last-child { border-bottom:none; }
+        .atk-n { flex:1; font-size:.8em; color:var(--gold-lt); letter-spacing:1px; text-transform:uppercase; }
+        .atk-tag { font-size:.62em; padding:2px 5px; white-space:nowrap; }
+        .tag-atk  { background:rgba(184,134,11,.1); border:1px solid var(--gold-dk); color:var(--gold); }
+        .tag-dano { background:rgba(70,130,180,.1); border:1px solid var(--blue-dk); color:var(--blue); }
+
+        /* Habilidades */
+        .hab-list { display:flex; flex-wrap:wrap; gap:4px; }
+        .hab-tag { font-size:.68em; background:rgba(61,47,36,.4); border:1px solid var(--border2); color:var(--text2); padding:2px 7px; }
+
+        /* Inventário */
+        .inv-row { display:flex; align-items:baseline; gap:5px; padding:2px 0; border-bottom:1px solid rgba(61,47,36,.2); font-size:.78em; }
+        .inv-row:last-child { border-bottom:none; }
+        .inv-num { color:var(--border2); font-size:.7em; width:13px; text-align:right; flex-shrink:0; font-family:monospace; }
+        .inv-n { color:var(--text2); flex:1; }
+        .inv-d { color:var(--text3); font-size:.8em; font-style:italic; display:block; padding-left:18px; margin-top:1px; }
+
+        /* Reputação */
+        .rep-row { display:flex; align-items:center; gap:9px; }
+        .rep-barra-w { flex:1; }
+        .rep-barra { position:relative; height:11px; overflow:hidden; border:1px solid var(--border2); }
+        .rep-grad { width:100%; height:100%; background:linear-gradient(to right,#4a1a0a 0%,#6b4423 25%,#8b7355 50%,#d4c8a8 75%,#e8dcc0 100%); }
+        .rep-mk { position:absolute; top:50%; transform:translate(-50%,-50%); width:13px; height:13px; border-radius:50%; background:radial-gradient(circle,#f5e6d3 0%,var(--gold-lt) 100%); border:2px solid var(--border); box-shadow:0 0 4px rgba(0,0,0,.8); }
+        .rep-v { font-family:'Rye',cursive; font-size:.9em; color:var(--gold-lt); min-width:26px; text-align:right; }
+
+        /* Recompensas */
+        .rec-block { display:flex; align-items:flex-start; gap:9px; }
+        .rec-val { font-family:'Rye',cursive; font-size:.95em; color:var(--gold); border:1px solid var(--gold-dk); background:rgba(184,134,11,.07); padding:3px 8px; align-self:center; white-space:nowrap; flex-shrink:0; }
+        .rec-desc { font-size:.76em; color:var(--text3); font-style:italic; line-height:1.5; flex:1; }
+
+        /* Utilitários */
+        .txt-vazio { color:var(--border2); font-style:italic; font-size:.76em; }
+        .hl { background:rgba(184,134,11,.25); color:var(--gold-lt); border-radius:1px; }
+
+        .no-results { text-align:center; padding:60px 20px; color:var(--border2); }
+        .no-results p { font-size:.82em; letter-spacing:2px; margin-top:10px; }
+
+        ::-webkit-scrollbar { width:5px; }
+        ::-webkit-scrollbar-track { background:var(--bg); }
+        ::-webkit-scrollbar-thumb { background:var(--border); }
+
+        @media(max-width:600px){
+            .header-title { display:none; }
+            .mini-group   { display:none; }
+            .atrib-grid   { grid-template-columns:repeat(2,1fr); }
+            .ant-grid     { grid-template-columns:repeat(2,1fr); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-header">
+    <a href="mestre.html" class="nav-btn">← MESTRE</a>
+    <span class="header-title">RESUMO</span>
+
+    <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Buscar nome, item, habilidade, tormento, ataque...">
+    </div>
+
+    <div class="header-controls">
+        <button class="ctrl-btn" onclick="expandAll()">▼ EXPANDIR TODOS</button>
+        <button class="ctrl-btn" onclick="collapseAll()">▲ RECOLHER TODOS</button>
+    </div>
+
+    <div class="status-pill">
+        <div class="status-dot" id="statusDot"></div>
+        <span id="statusTxt">—</span>
+    </div>
+</div>
+
+<div class="fichas-list" id="fichasList"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyCp5slzZKVuMQ5N86zv2vXbvMGEeNwem94",
+    authDomain: "sds-ficha.firebaseapp.com",
+    projectId: "sds-ficha",
+    storageBucket: "sds-ficha.firebasestorage.app",
+    messagingSenderId: "406558124782",
+    appId: "1:406558124782:web:e1f68e6693a57dde7ea1ff"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+const ANTS = [
+    {id:'combate',n:'Combate'},{id:'negocios',n:'Negócios'},
+    {id:'montaria',n:'Montaria'},{id:'tradicao',n:'Tradição'},
+    {id:'labuta',n:'Labuta'},{id:'exploracao',n:'Exploração'},
+    {id:'roubo',n:'Roubo'},{id:'medicina',n:'Medicina'},
+    {id:'tecnologia',n:'Tecnologia'},{id:'culinaria',n:'Culinária'},
+    {id:'domestico',n:'Doméstico'},{id:'direcao',n:'Direção'}
+];
+
+const nv = (v,fb=0) => parseInt(v)||fb;
+const sv = (v,fb='') => (v??fb).toString().trim();
+
+let fichasData = [];
+let searchTerm = '';
+
+// ── Highlight de termo de busca ────────────────────────────
+function hl(text, term) {
+    if (!term || !text) return text||'';
+    const esc = term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    return String(text).replace(new RegExp(`(${esc})`,'gi'),'<span class="hl">$1</span>');
+}
+
+// ── Texto plano para busca ─────────────────────────────────
+function fichaText(p) {
+    return [
+        sv(p.nome), sv(p.tormento), sv(p.recompensas), sv(p.valorRecompensa),
+        ...(p.habilidades||[]).flatMap(h=>[sv(h.nome),sv(h.descricao)]),
+        ...(p.inventario||[]).flatMap(i=>[sv(i.nome),sv(i.descricao)]),
+        ...(p.ataques||[]).map(a=>sv(a.nome)),
+        ...ANTS.map(a=>a.n)
+    ].join(' ').toLowerCase();
+}
+
+// ── Pips ──────────────────────────────────────────────────
+function pipHtml(qtd) {
+    let h='';
+    for(let i=1;i<=6;i++) h+=`<div class="ant-pip${i<=qtd?' on':''}"></div>`;
+    return `<div class="ant-pips">${h}</div>`;
+}
+
+// ── Render de card ─────────────────────────────────────────
+function renderCard(p, term) {
+    const id         = sv(p.id)||sv(p.nome).replace(/\s/g,'_');
+    const vidaAtual  = nv(p.vida);
+    const vidaMax    = nv(p.vidaMax);
+    const vidaPct    = vidaMax>0 ? Math.min(100,(vidaAtual/vidaMax)*100) : 0;
+    const agi        = nv(p.agilidade);
+    const defTotal   = 5+nv(p.defesaBonus);
+    const acoesTotal = 1+agi+nv(p.acoesBonus);
+    const honra      = Math.max(-15,Math.min(15,nv(p.honraValor)));
+    const honraPct   = ((honra+15)/30)*100;
+    const torm       = sv(p.tormento);
+
+    // avatar
+    const av = sv(p.avatarUrl);
+    const avatarHTML = av
+        ? `<img class="card-avatar" src="${av}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="card-avatar-ph" style="display:none">🤠</div>`
+        : `<div class="card-avatar-ph">🤠</div>`;
+
+    // subtítulo resumido
+    const subText = `Nv ${sv(p.nivel,'1')}${torm?' · '+torm.substring(0,38)+(torm.length>38?'…':''):''}`;
+
+    // mini badges água/comida
+    const aguaBadge  = p.agua  ? `<span class="mbadge mbadge-ok">💧</span>`  : `<span class="mbadge mbadge-bad">💧</span>`;
+    const comidaBadge= p.comida? `<span class="mbadge mbadge-ok">🍖</span>`  : `<span class="mbadge mbadge-bad">🍖</span>`;
+
+    // antecedentes
+    const antHtml = ANTS.map(a=>{
+        const pips = nv(p[a.id]);
+        const mod  = nv(p[a.id+'Mod']);
+        const ms   = mod>0?`+${mod}`:mod<0?`${mod}`:null;
+        return `<div class="ant-item">
+            <span class="ant-n">${hl(a.n,term)}</span>
+            <div class="ant-r">${ms?`<span class="ant-mod">${ms}</span>`:''}${pipHtml(pips)}</div>
+        </div>`;
+    }).join('');
+
+    // ataques
+    const atksHtml = (p.ataques&&p.ataques.length)
+        ? p.ataques.map(a=>{
+            const bAtk = nv(a.bonusAtk), bDano=nv(a.bonusDano), dano=sv(a.dano,'0');
+            return `<div class="atk-item">
+                <span class="atk-n">${hl(sv(a.nome)||'—',term)}</span>
+                ${bAtk!==0?`<span class="atk-tag tag-atk">ATQ ${bAtk>=0?'+':''}${bAtk}</span>`:''}
+                ${(dano!=='0'||bDano!==0)?`<span class="atk-tag tag-dano">${dano!=='0'?dano:''}${bDano!==0?(bDano>0?'+':'')+bDano:''}</span>`:''}
+            </div>`;
+        }).join('')
+        : `<span class="txt-vazio">Nenhum ataque</span>`;
+
+    // habilidades
+    const habHtml = (p.habilidades&&p.habilidades.length)
+        ? `<div class="hab-list">${p.habilidades.map(h=>`<span class="hab-tag">${hl(sv(h.nome)||'?',term)}</span>`).join('')}</div>`
+        : `<span class="txt-vazio">Nenhuma habilidade</span>`;
+
+    // inventário
+    const invHtml = (p.inventario&&p.inventario.length)
+        ? p.inventario.map((item,i)=>{
+            const d=sv(item.descricao);
+            return `<div class="inv-row">
+                <span class="inv-num">${i+1}</span>
+                <span class="inv-n">${hl(sv(item.nome)||'—',term)}${d?`<span class="inv-d">${hl(d,term)}</span>`:''}</span>
+            </div>`;
+        }).join('')
+        : `<span class="txt-vazio">Inventário vazio</span>`;
+
+    // recompensas
+    const recVal = sv(p.valorRecompensa), recDesc=sv(p.recompensas);
+    const recHtml = (recVal||recDesc)
+        ? `<div class="rec-block">${recVal?`<span class="rec-val">${hl(recVal,term)}</span>`:''}${recDesc?`<span class="rec-desc">${hl(recDesc,term)}</span>`:''}</div>`
+        : `<span class="txt-vazio">Sem recompensas</span>`;
+
+    return `
+<div class="ficha-card" data-id="${id}" data-txt="${encodeURIComponent(fichaText(p))}">
+
+    <div class="card-header" onclick="window._toggleCard(this.parentElement)">
+        ${avatarHTML}
+        <div class="card-nome-block">
+            <div class="card-nome">${hl(sv(p.nome,'Pistoleiro'),term)}</div>
+            <div class="card-sub">${hl(subText,term)}</div>
+        </div>
+        <div class="card-mini">
+            <div class="mini-group">
+                <span class="mini-lbl">PV</span>
+                <span class="mini-val mini-pv">${vidaAtual}/${vidaMax}</span>
+                <div class="mini-barra"><div class="mini-fill" style="width:${vidaPct}%"></div></div>
+            </div>
+            <div class="mini-div"></div>
+            <div class="mini-group">
+                <span class="mini-lbl">DEF</span>
+                <span class="mini-val">${defTotal}</span>
+            </div>
+            <div class="mini-group">
+                <span class="mini-lbl">AÇÕES</span>
+                <span class="mini-val">${acoesTotal}</span>
+            </div>
+            <div class="mini-div"></div>
+            <span class="mini-dinheiro">R$${sv(p.dinheiro,'0')}</span>
+            <div class="mini-badges">${aguaBadge}${comidaBadge}</div>
+        </div>
+        <span class="card-chevron">▶</span>
+    </div>
+
+    <div class="card-body">
+
+        <div class="cs">
+            <div class="cs-lbl">◈ Atributos</div>
+            <div class="atrib-grid">
+                <div class="ab"><span class="ab-l">Físico</span><span class="ab-v">${nv(p.fisico)}</span></div>
+                <div class="ab"><span class="ab-l">Agilidade</span><span class="ab-v">${nv(p.agilidade)}</span></div>
+                <div class="ab"><span class="ab-l">Intelecto</span><span class="ab-v">${nv(p.intelecto)}</span></div>
+                <div class="ab"><span class="ab-l">Coragem</span><span class="ab-v">${nv(p.coragem)}</span></div>
+            </div>
+        </div>
+
+        <div class="cs">
+            <div class="cs-lbl">⚔ Combate</div>
+            <div class="combate-row">
+                <div class="cb"><span class="cb-l">DEFESA</span><span class="cb-v">${defTotal}</span></div>
+                <div class="cb"><span class="cb-l">AÇÕES</span><span class="cb-v">${acoesTotal}</span></div>
+            </div>
+        </div>
+
+        <div class="cs">
+            <div class="cs-lbl">☠ Tormento</div>
+            ${torm?`<div class="tormento-txt">${hl(torm,term)}</div>`:`<span class="txt-vazio">Nenhum tormento</span>`}
+        </div>
+
+        <div class="cs">
+            <div class="cs-lbl">◉ Antecedentes</div>
+            <div class="ant-grid">${antHtml}</div>
+        </div>
+
+        <div class="cs">
+            <div class="cs-lbl">🔫 Ataques</div>
+            ${atksHtml}
+        </div>
+
+        <div class="cs">
+            <div class="cs-lbl">✦ Habilidades</div>
+            ${habHtml}
+        </div>
+
+        <div class="cs">
+            <div class="cs-lbl">🎒 Inventário</div>
+            ${invHtml}
+        </div>
+
+        <div class="cs">
+            <div class="cs-lbl">★ Reputação</div>
+            <div class="rep-row">
+                <div class="rep-barra-w">
+                    <div class="rep-barra">
+                        <div class="rep-grad"></div>
+                        <div class="rep-mk" style="left:${honraPct}%"></div>
+                    </div>
+                </div>
+                <span class="rep-v">${honra>0?'+':''}${honra}</span>
+            </div>
+        </div>
+
+        <div class="cs">
+            <div class="cs-lbl">💰 Recompensas</div>
+            ${recHtml}
+        </div>
+
+    </div>
+</div>`;
+}
+
+// ── Toggle individual ──────────────────────────────────────
+window._toggleCard = function(card) {
+    card.classList.toggle('expandido');
+};
+
+// ── Expand / Collapse all (visíveis) ──────────────────────
+window.expandAll  = ()=> document.querySelectorAll('.ficha-card:not(.hidden-filter)').forEach(c=>c.classList.add('expandido'));
+window.collapseAll= ()=> document.querySelectorAll('.ficha-card').forEach(c=>c.classList.remove('expandido'));
+
+// ── Busca: filtra sem re-renderizar ───────────────────────
+function aplicarFiltro() {
+    const term = searchTerm.toLowerCase().trim();
+    let visiveis = 0;
+
+    document.querySelectorAll('.ficha-card').forEach(card => {
+        const txt = decodeURIComponent(card.dataset.txt||'');
+        const bate = !term || txt.includes(term);
+        card.classList.toggle('hidden-filter', !bate);
+        if (bate) {
+            visiveis++;
+            // Auto-expande se há busca e a ficha bate
+            if (term) card.classList.add('expandido');
+        }
+    });
+
+    // Mostra "sem resultados" se necessário
+    let noRes = document.getElementById('noResults');
+    if (visiveis === 0) {
+        if (!noRes) {
+            noRes = document.createElement('div');
+            noRes.id = 'noResults';
+            noRes.className = 'no-results';
+            noRes.innerHTML = `<div style="font-size:2em;opacity:.3">🤠</div><p>NENHUM PISTOLEIRO ENCONTRADO</p>`;
+            document.getElementById('fichasList').appendChild(noRes);
+        }
+    } else if (noRes) {
+        noRes.remove();
+    }
+
+    // Atualiza contagem no header
+    const st = document.getElementById('statusTxt');
+    st.textContent = term
+        ? `${visiveis}/${fichasData.length} RESULTADO${visiveis!==1?'S':''}`
+        : `${fichasData.length} PISTOLEIRO${fichasData.length!==1?'S':''}`;
+}
+
+// ── Render completo (só no snapshot) ──────────────────────
+function renderTudo() {
+    const list = document.getElementById('fichasList');
+    // Preserva estado de expandido por id
+    const expandedIds = new Set(
+        Array.from(document.querySelectorAll('.ficha-card.expandido')).map(c=>c.dataset.id)
+    );
+    const term = searchTerm.toLowerCase().trim();
+    list.innerHTML = fichasData.map(p=>renderCard(p,term)).join('');
+    // Restaura estados
+    document.querySelectorAll('.ficha-card').forEach(c=>{
+        if(expandedIds.has(c.dataset.id)) c.classList.add('expandido');
+    });
+    aplicarFiltro();
+}
+
+// ── Input de busca ─────────────────────────────────────────
+let debounce;
+document.getElementById('searchInput').addEventListener('input', e=>{
+    searchTerm = e.target.value;
+    clearTimeout(debounce);
+    // Busca leve: só filtra, não re-renderiza
+    debounce = setTimeout(aplicarFiltro, 140);
+});
+
+// Limpar busca com Escape
+document.getElementById('searchInput').addEventListener('keydown', e=>{
+    if(e.key==='Escape'){
+        e.target.value='';
+        searchTerm='';
+        aplicarFiltro();
+    }
+});
+
+// ── Firebase ───────────────────────────────────────────────
+onSnapshot(collection(db,"fichas"), snapshot=>{
+    fichasData = snapshot.docs.map(d=>d.data()).sort((a,b)=>(a.nome||'').localeCompare(b.nome||''));
+
+    const st  = document.getElementById('statusTxt');
+    const dot = document.getElementById('statusDot');
+
+    if(snapshot.empty){
+        st.textContent='SEM FICHAS';
+        st.style.color='var(--text3)';
+        dot.style.background='var(--text3)';
+        dot.style.boxShadow='none';
+        dot.style.animation='none';
+        document.getElementById('fichasList').innerHTML=
+            `<div class="no-results"><div style="font-size:2.5em;opacity:.3">🤠</div><p>AGUARDANDO PISTOLEIROS...</p></div>`;
+        return;
+    }
+
+    st.style.color='var(--green)';
+    renderTudo();
+});
+</script>
+</body>
+</html>
