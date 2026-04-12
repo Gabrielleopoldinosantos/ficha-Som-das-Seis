@@ -2,10 +2,11 @@
 <html lang="pt-BR">
 <head>
  <meta charset="UTF-8">
- <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
  <title>O Som das Seis - Ficha de Personagem</title>
  <link href="https://fonts.googleapis.com/css2?family=Rye&family=Special+Elite&display=swap" rel="stylesheet">
  <link rel="stylesheet" href="css/style.css">
+ <link rel="stylesheet" href="css/responsive.css">
  <style>
 
   /* ══════════════════════════════════════════════════════
@@ -527,7 +528,7 @@
     <!-- INFORMAÇÕES -->
     <div class="secao secao-ampla">
      <div class="secao-header">Informações do Personagem</div>
-     <div style="display:flex;gap:18px;align-items:flex-start;">
+     <div class="info-personagem-layout" style="display:flex;gap:18px;align-items:flex-start;">
       <div style="flex:1;min-width:0;">
        <div class="campo">
         <label>Nome</label>
@@ -616,7 +617,7 @@
     <!-- ANTECEDENTES -->
     <div class="secao secao-ampla">
      <div class="secao-header">Antecedentes</div>
-     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
+     <div class="antecedentes-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
       <script>
        const antecedentes = [
         {id:'combate',nome:'Combate'},{id:'negocios',nome:'Negócios'},
@@ -745,7 +746,7 @@
    </div>
 
    <div class="navigation-row" style="text-align:center;margin-top:40px;padding-bottom:20px;">
-    <button class="btn btn-base" onclick="irParaBase()">Ir para a Casa</button>
+    <button class="btn btn-base" onclick="irParaBase()">Ir para Covil</button>
    </div>
 
    <footer style="margin-top:20px;padding:18px 24px;border-top:1px solid #3d2f24;display:flex;justify-content:center;align-items:center;gap:30px;flex-wrap:wrap;">

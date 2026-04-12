@@ -1,0 +1,695 @@
+/* ═══════════════════════════════════════════════════════════════
+   responsive.css — O Som das Seis · Mobile Responsivo
+   Mantém visual desktop intacto, melhora mobile/tablet
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── TABLET (max 900px) ──────────────────────────────────── */
+@media (max-width: 900px) {
+    .ficha-grid {
+        grid-template-columns: 1fr 1fr !important;
+    }
+
+    .secao-ampla {
+        grid-column: span 2 !important;
+    }
+
+    .secao-dupla {
+        grid-column: span 2 !important;
+    }
+
+    h1 {
+        font-size: 2.2em !important;
+        letter-spacing: 2px !important;
+    }
+
+    .atributos-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    .mestre-top {
+        flex-direction: column !important;
+    }
+
+    .log-lateral {
+        position: static !important;
+        max-height: 300px !important;
+    }
+}
+
+/* ── MOBILE (max 600px) ──────────────────────────────────── */
+@media (max-width: 600px) {
+
+    /* ── Geral ── */
+    body {
+        padding: 0 !important;
+        overflow-x: hidden;
+    }
+
+    .container {
+        padding: 12px !important;
+        border: none !important;
+        border-top: 4px solid #b8860b !important;
+        box-shadow: none !important;
+    }
+
+    h1 {
+        font-size: 1.7em !important;
+        letter-spacing: 1px !important;
+        margin-bottom: 14px !important;
+        padding: 0 10px !important;
+    }
+
+    /* ── Grid da ficha: 1 coluna ── */
+    .ficha-grid {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+
+    .secao-ampla,
+    .secao-dupla {
+        grid-column: span 1 !important;
+    }
+
+    /* ── Seções ── */
+    .secao {
+        padding: 12px !important;
+        border-radius: 0 !important;
+    }
+
+    .secao-header {
+        font-size: 0.95em !important;
+        padding: 8px 10px !important;
+        margin: -12px -12px 12px -12px !important;
+    }
+
+    /* ── Botões de ação topo ── */
+    .buttons-row {
+        gap: 6px !important;
+        margin-bottom: 12px !important;
+    }
+
+    .buttons-row .btn {
+        flex: 1;
+        padding: 8px 10px !important;
+        font-size: 0.8em !important;
+    }
+
+    /* ── Barra de auth (topo direito) ── */
+    #authBar {
+        padding: 5px 8px !important;
+        gap: 6px !important;
+    }
+
+    #authUserInfo {
+        max-width: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 0.58em !important;
+    }
+
+    #btnVoltarSeletor,
+    #btnLogout {
+        font-size: 0.58em !important;
+        padding: 3px 7px !important;
+    }
+
+    /* ── Tela de login ── */
+    .login-box {
+        padding: 24px 18px 20px !important;
+        margin: 16px !important;
+        width: calc(100% - 32px) !important;
+        max-width: none !important;
+    }
+
+    .login-title {
+        font-size: 1.5em !important;
+        letter-spacing: 2px !important;
+    }
+
+    .login-btn-group {
+        flex-direction: column !important;
+        gap: 8px !important;
+    }
+
+    #btnLogin,
+    #btnCadastro {
+        width: 100% !important;
+        padding: 13px !important;
+    }
+
+    /* ── Seletor de fichas ── */
+    #telaSeletor {
+        padding: 50px 12px 30px !important;
+    }
+
+    .seletor-title {
+        font-size: 1.5em !important;
+        letter-spacing: 2px !important;
+    }
+
+    .seletor-card {
+        gap: 8px !important;
+        padding: 9px 10px !important;
+    }
+
+    .seletor-card-av {
+        width: 44px !important;
+        height: 44px !important;
+        flex-shrink: 0 !important;
+    }
+
+    .seletor-card-nome {
+        font-size: 0.9em !important;
+    }
+
+    .seletor-card-sub {
+        font-size: 0.6em !important;
+    }
+
+    .seletor-btn-abrir {
+        padding: 5px 10px !important;
+        font-size: 0.65em !important;
+        letter-spacing: 1px !important;
+    }
+
+    /* ── Informações do personagem ── */
+    .secao-ampla > div[style*="flex"] {
+        flex-direction: column !important;
+        gap: 14px !important;
+    }
+
+    /* Avatar centralizado em mobile */
+    .avatar-frame,
+    .avatar-edit-btn,
+    #avatarImg {
+        width: 140px !important;
+        height: 140px !important;
+    }
+
+    .avatar-edit-btn {
+        width: 140px !important;
+        height: auto !important;
+    }
+
+    /* ── Atributos ── */
+    .atributos-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px !important;
+    }
+
+    .atributo-box {
+        padding: 8px !important;
+    }
+
+    .atributo-box label {
+        font-size: 0.7em !important;
+    }
+
+    .atributo-box input {
+        font-size: 1.3em !important;
+        height: 42px !important;
+        padding: 5px !important;
+    }
+
+    .btn-dice {
+        padding: 6px 9px !important;
+        font-size: 1em !important;
+        min-width: 34px !important;
+    }
+
+    /* ── Status / Vida ── */
+    .status-inputs input {
+        width: 72px !important;
+        height: 56px !important;
+        font-size: 1.8em !important;
+    }
+
+    /* ── Combate ── */
+    .combate-grid {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px !important;
+    }
+
+    .combate-box {
+        padding: 10px 8px !important;
+        min-height: 130px !important;
+    }
+
+    .combate-valor {
+        font-size: 1.6em !important;
+    }
+
+    /* Combate dinâmico: 3 colunas comprimidas */
+    body.combate-dinamico .combate-grid {
+        grid-template-columns: 1fr 1fr !important;
+    }
+
+    /* ── Tormento ── */
+    .tormento-input {
+        font-size: 1em !important;
+        padding: 10px !important;
+        width: 100% !important;
+    }
+
+    /* ── Antecedentes ── */
+    .secao-ampla > div[style*="grid-template-columns: repeat(3"] {
+        grid-template-columns: 1fr 1fr !important;
+    }
+
+    /* Override direto para o grid dos antecedentes */
+    .secao-ampla > div > .campo-antecedente {
+        /* mantém 2 colunas, ajustado na regra do pai */
+    }
+
+    .pips-row {
+        padding: 6px 8px !important;
+        gap: 8px !important;
+    }
+
+    .pip {
+        width: 16px !important;
+        height: 16px !important;
+    }
+
+    .modificador-input {
+        width: 36px !important;
+        height: 28px !important;
+        font-size: 0.8em !important;
+    }
+
+    /* ── Ataques ── */
+    .ataque-header {
+        padding: 8px 10px !important;
+    }
+
+    .ataque-header input[type="text"] {
+        font-size: 0.9em !important;
+    }
+
+    .ataque-col {
+        padding: 10px 8px !important;
+    }
+
+    .atk-bonus,
+    .atk-dano-bonus {
+        width: 48px !important;
+    }
+
+    .atk-btn-rolar-atk,
+    .atk-btn-rolar-dano {
+        padding: 5px 9px !important;
+        font-size: 0.75em !important;
+    }
+
+    /* ── Habilidades ── */
+    .item-box {
+        padding: 5px 7px !important;
+    }
+
+    /* ── Inventário ── */
+    .inv-row {
+        height: 36px !important;
+    }
+
+    .inv-nome {
+        font-size: 0.85em !important;
+    }
+
+    /* ── Reputação/Honra ── */
+    .honra-bar {
+        height: 34px !important;
+    }
+
+    #honraValor {
+        height: 44px !important;
+        font-size: 1.2em !important;
+        width: 72px !important;
+    }
+
+    /* ── Montaria ── */
+    .montaria-secao {
+        margin-top: 10px !important;
+    }
+
+    .montaria-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .montaria-nome {
+        grid-column: 1 !important;
+    }
+
+    .montaria-combate-atributos,
+    .montaria-inventario {
+        grid-column: 1 !important;
+    }
+
+    /* ── Combate dinâmico – ataques em coluna ── */
+    body.combate-dinamico .ataque-corpo {
+        grid-template-columns: 1fr !important;
+    }
+
+    body.combate-dinamico .ataque-col-sep {
+        display: none !important;
+    }
+
+    /* ── Footer ── */
+    footer {
+        flex-direction: column !important;
+        gap: 14px !important;
+        padding: 14px 16px !important;
+    }
+
+    /* ── Dado resultado (centralizado e menor) ── */
+    .dice-result {
+        font-size: 2.5em !important;
+        padding: 28px 40px !important;
+        border-radius: 14px !important;
+        width: 85vw !important;
+        max-width: 320px !important;
+        box-sizing: border-box;
+    }
+
+    /* ── Navegação: ir para base ── */
+    .navigation-row {
+        padding-bottom: 30px !important;
+    }
+
+    .btn-base {
+        width: 100% !important;
+        padding: 12px 20px !important;
+        font-size: 1em !important;
+    }
+}
+
+/* ── MOBILE PEQUENO (max 400px) ── */
+@media (max-width: 400px) {
+    h1 {
+        font-size: 1.4em !important;
+    }
+
+    .login-title {
+        font-size: 1.3em !important;
+    }
+
+    /* Antecedentes em 1 coluna */
+    .secao-ampla > div[style*="repeat(3"] {
+        grid-template-columns: 1fr !important;
+    }
+
+    .atributos-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    .pips-container {
+        gap: 4px !important;
+    }
+
+    .pip {
+        width: 14px !important;
+        height: 14px !important;
+    }
+}
+
+/* ════════════════════════════════════════════════════════════
+   RESUMO.HTML — Painel do GM mobile
+   ════════════════════════════════════════════════════════════ */
+@media (max-width: 600px) {
+
+    /* Header fixo */
+    .page-header {
+        padding: 7px 10px !important;
+        gap: 7px !important;
+    }
+
+    .header-title {
+        display: none !important;
+    }
+
+    .nav-btn {
+        font-size: 0.65em !important;
+        padding: 5px 8px !important;
+    }
+
+    .search-wrap {
+        min-width: 0 !important;
+        flex: 1 !important;
+    }
+
+    .header-controls {
+        gap: 4px !important;
+    }
+
+    .ctrl-btn {
+        font-size: 0.6em !important;
+        padding: 5px 7px !important;
+        letter-spacing: 0 !important;
+    }
+
+    /* Cards do resumo */
+    .card-header {
+        padding: 7px 10px !important;
+        gap: 7px !important;
+    }
+
+    .card-nome {
+        font-size: 0.88em !important;
+    }
+
+    .mini-group {
+        display: none !important;
+    }
+
+    .mini-div {
+        display: none !important;
+    }
+
+    .mini-dinheiro {
+        font-size: 0.7em !important;
+    }
+
+    /* Corpo do card */
+    .atrib-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    .ant-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    .cs {
+        padding: 7px 10px !important;
+    }
+}
+
+/* ════════════════════════════════════════════════════════════
+   MESTRE.HTML — Painel do mestre mobile
+   ════════════════════════════════════════════════════════════ */
+@media (max-width: 600px) {
+
+    .mestre-layout {
+        padding: 10px !important;
+        gap: 12px !important;
+    }
+
+    h1[style*="Rye"] {
+        font-size: 1.4em !important;
+        padding: 14px 0 8px !important;
+    }
+
+    .grid-players {
+        grid-template-columns: 1fr !important;
+    }
+
+    .log-lateral {
+        max-height: 240px !important;
+    }
+
+    /* Tracker de iniciativa */
+    .tracker-head {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 8px !important;
+        padding: 8px 12px !important;
+    }
+
+    .tracker-add {
+        width: 100%;
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+    }
+
+    #addNome {
+        flex: 1 !important;
+        min-width: 100px !important;
+    }
+
+    #addVal {
+        width: 60px !important;
+    }
+
+    .t-btn {
+        font-size: 0.72em !important;
+        padding: 4px 9px !important;
+    }
+
+    .t-row {
+        padding: 5px 6px !important;
+        gap: 7px !important;
+    }
+
+    .info-combat-bar {
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+        justify-content: flex-start !important;
+    }
+
+    /* Login do mestre */
+    .login-box {
+        width: calc(100% - 24px) !important;
+        margin: 12px !important;
+        padding: 20px 16px !important;
+    }
+
+    /* Botão sair (fixo no canto) */
+    h1 button[style*="position:absolute"] {
+        position: static !important;
+        display: block !important;
+        margin: 0 auto 12px auto !important;
+        width: calc(100% - 24px) !important;
+    }
+}
+
+/* ════════════════════════════════════════════════════════════
+   BASE.HTML — Posto de avanço mobile
+   ════════════════════════════════════════════════════════════ */
+@media (max-width: 600px) {
+
+    .header-base,
+    .base-grid {
+        flex-direction: column !important;
+        grid-template-columns: 1fr !important;
+    }
+
+    /* .header-base já é flex, garante coluna */
+    div.header-base {
+        flex-direction: column !important;
+    }
+
+    /* base-grid é um grid/flex dependendo do contexto */
+    .base-grid {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    /* Título grande */
+    h1 {
+        font-size: 2em !important;
+    }
+
+    /* Botão voltar */
+    .btn-base-nav {
+        width: 100% !important;
+        box-sizing: border-box !important;
+        margin-bottom: 14px !important;
+    }
+
+    /* RD e inputs de status */
+    #basePV, #basePVMax {
+        width: 75px !important;
+        height: 50px !important;
+    }
+
+    /* Recursos */
+    .recurso-item {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        padding: 8px 12px !important;
+    }
+
+    .recurso-item label {
+        font-size: 0.8em !important;
+    }
+
+    .recurso-item input {
+        width: 80px !important;
+        padding: 6px !important;
+    }
+
+    /* Armazém */
+    #armazemContainer {
+        max-height: none !important;
+    }
+}
+
+/* ════════════════════════════════════════════════════════════
+   TOUCH — Melhorias gerais para toque
+   ════════════════════════════════════════════════════════════ */
+@media (max-width: 900px) {
+
+    /* Alvos de toque maiores */
+    .btn,
+    button,
+    .pip,
+    input[type="checkbox"] {
+        touch-action: manipulation;
+    }
+
+    /* Evita zoom em inputs iOS */
+    input[type="text"],
+    input[type="number"],
+    input[type="email"],
+    input[type="password"],
+    textarea,
+    select {
+        font-size: max(16px, 0.9em) !important;
+        /* Sobrescreve apenas onde quebra – o !important do pai ainda domina o visual */
+    }
+
+    /* Previne zoom em iOS mantendo aparência */
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+        -webkit-text-size-adjust: 100%;
+    }
+
+    /* Scroll suave em listas */
+    .fichas-list,
+    #inventarioContainer,
+    #inventarioMontariaContainer,
+    #armazemContainer {
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* ════════════════════════════════════════════════════════════
+   FIX: Antecedentes grid override
+   ════════════════════════════════════════════════════════════ */
+@media (max-width: 600px) {
+    .antecedentes-grid {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 10px !important;
+    }
+}
+
+@media (max-width: 380px) {
+    .antecedentes-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* ════════════════════════════════════════════════════════════
+   FIX: Info do personagem (flex row → column)
+   ════════════════════════════════════════════════════════════ */
+@media (max-width: 600px) {
+    .info-personagem-layout {
+        flex-direction: column !important;
+        align-items: center !important;
+    }
+
+    .info-personagem-layout > div:first-child {
+        width: 100% !important;
+    }
+}

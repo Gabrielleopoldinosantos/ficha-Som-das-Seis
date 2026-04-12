@@ -109,12 +109,50 @@
             font-weight: bold;
         }
 
+        /* Indicador de salvamento */
+        #saveStatus {
+            position: fixed;
+            top: 12px;
+            right: 16px;
+            z-index: 999;
+            font-family: 'Special Elite', monospace;
+            font-size: 0.75em;
+            letter-spacing: 2px;
+            padding: 5px 12px;
+            border-radius: 3px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        #saveStatus.saving {
+            opacity: 1;
+            background: rgba(20,16,10,0.92);
+            border: 1px solid #b8860b;
+            color: #ffd700;
+        }
+        #saveStatus.saved {
+            opacity: 1;
+            background: rgba(10,20,10,0.92);
+            border: 1px solid #4a8a4a;
+            color: #7abf7a;
+        }
+        #saveStatus.error {
+            opacity: 1;
+            background: rgba(30,5,5,0.92);
+            border: 1px solid #8b2222;
+            color: #ff6666;
+        }
+
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #1a1714; }
-        ::-webkit-scrollbar-thumb { background: #3d2f24; border: 1px solid #4a3e35; }
+        ::-webkit-scrollbar-thumb { background: #3d2f24; border: 1px solid #4a4e35; }
     </style>
 </head>
 <body>
+
+    <!-- Indicador de salvamento -->
+    <div id="saveStatus"></div>
+
     <div class="container">
         <button class="btn btn-small btn-base-nav" onclick="window.location.href='index.html'">← VOLTAR PARA FICHA</button>
 
@@ -200,7 +238,13 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, onSnapshot, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import {
+            getFirestore,
+            doc,
+            onSnapshot,
+            setDoc,
+            serverTimestamp
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCp5slzZKVuMQ5N86zv2vXbvMGEeNwem94",
@@ -213,74 +257,133 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        const db  = getFirestore(app);
+
+        // ID fixo — único documento de base compartilhado por todos
         const BASE_ID = "BASE_COLETIVA_UNICA";
 
+        // ── Indicador de salvamento ──────────────────────
+        function mostrarStatus(tipo, msg) {
+            const el = document.getElementById('saveStatus');
+            el.className = tipo;
+            el.textContent = msg;
+            if (tipo === 'saved') {
+                setTimeout(() => { el.className = ''; el.textContent = ''; el.style.opacity = '0'; }, 2500);
+            }
+        }
+
+        // ── Toggle descrição do item ─────────────────────
         window.toggleDescricao = (btn) => {
             const container = btn.closest('.item-box');
             const txt = container.querySelector('textarea');
-            txt.style.display = (txt.style.display === 'none') ? 'block' : 'none';
+            txt.style.display = (txt.style.display === 'none' || txt.style.display === '')
+                ? 'block' : 'none';
         };
 
+        // ── Listener em tempo real (sem autenticação) ────
+        // IMPORTANTE: Para que isso funcione sem login, as regras do
+        // Firestore para a coleção "bases" precisam permitir leitura e
+        // escrita públicas. Veja as instruções no comentário abaixo.
         onSnapshot(doc(db, "bases", BASE_ID), (docSnap) => {
             if (docSnap.exists()) {
                 const data = docSnap.data();
-                Object.keys(data).forEach(key => {
+
+                // Preenche os campos simples
+                const camposSimples = [
+                    'basePV','basePVMax','baseRD','melhoriasLista',
+                    'vagasUsadas','resComida','resAgua',
+                    'resCombustivel','resSucata','resRaro'
+                ];
+                camposSimples.forEach(key => {
                     const el = document.getElementById(key);
-                    if (el && key !== 'armazem') el.value = data[key];
+                    if (el && data[key] !== undefined) el.value = data[key];
                 });
 
+                // Reconstrói o armazém
                 const container = document.getElementById('armazemContainer');
                 container.innerHTML = '';
-                data.armazem?.forEach(item => {
-                    container.appendChild(criarEstruturaItem(item.nome, item.desc));
+                (data.armazem || []).forEach(item => {
+                    container.appendChild(criarEstruturaItem(item.nome || '', item.desc || ''));
                 });
             }
             document.body.style.opacity = '1';
+        }, (error) => {
+            // Se a leitura falhar por falta de permissão, exibe aviso
+            console.error('Erro ao ler base:', error);
+            document.body.style.opacity = '1';
+            mostrarStatus('error', '⚠ SEM PERMISSÃO — CONFIGURE AS REGRAS DO FIRESTORE');
         });
 
+        // ── Salvar ───────────────────────────────────────
         async function salvarBase() {
+            mostrarStatus('saving', 'SALVANDO...');
             const baseData = {
-                basePV: document.getElementById('basePV').value,
-                basePVMax: document.getElementById('basePVMax').value,
-                baseRD: document.getElementById('baseRD').value,
-                melhoriasLista: document.getElementById('melhoriasLista').value,
-                vagasUsadas: document.getElementById('vagasUsadas').value,
-                resComida: document.getElementById('resComida').value,
-                resAgua: document.getElementById('resAgua').value,
-                resCombustivel: document.getElementById('resCombustivel').value,
-                resSucata: document.getElementById('resSucata').value,
-                resRaro: document.getElementById('resRaro').value,
-                armazem: Array.from(document.getElementById('armazemContainer').children).map(div => ({
-                    nome: div.querySelector('input').value,
-                    desc: div.querySelector('textarea').value
+                basePV:          document.getElementById('basePV').value,
+                basePVMax:       document.getElementById('basePVMax').value,
+                baseRD:          document.getElementById('baseRD').value,
+                melhoriasLista:  document.getElementById('melhoriasLista').value,
+                vagasUsadas:     document.getElementById('vagasUsadas').value,
+                resComida:       document.getElementById('resComida').value,
+                resAgua:         document.getElementById('resAgua').value,
+                resCombustivel:  document.getElementById('resCombustivel').value,
+                resSucata:       document.getElementById('resSucata').value,
+                resRaro:         document.getElementById('resRaro').value,
+                armazem: Array.from(
+                    document.getElementById('armazemContainer').children
+                ).map(div => ({
+                    nome: div.querySelector('input')?.value  || '',
+                    desc: div.querySelector('textarea')?.value || ''
                 })),
                 updatedAt: serverTimestamp()
             };
-            await setDoc(doc(db, "bases", BASE_ID), baseData);
+
+            try {
+                await setDoc(doc(db, "bases", BASE_ID), baseData);
+                mostrarStatus('saved', '✓ SALVO');
+            } catch (err) {
+                console.error('Erro ao salvar:', err);
+                mostrarStatus('error', '✗ ERRO — VERIFIQUE AS REGRAS DO FIRESTORE');
+            }
         }
 
-        window.adicionarItemBase = () => {
-            document.getElementById('armazemContainer').appendChild(criarEstruturaItem('', ''));
-        };
-
+        // ── Criar item do armazém ────────────────────────
         function criarEstruturaItem(nome, desc) {
             const div = document.createElement('div');
             div.className = 'item-box';
             div.innerHTML = `
-                <div class="item-header">
-                    <input type="text" value="${nome}" placeholder="Nome do Item...">
-                    <button class="btn btn-small" onclick="window.toggleDescricao(this)">📝</button>
-                    <button class="btn btn-small btn-danger" onclick="this.parentElement.parentElement.remove(); window.triggerSalvar()">🗑️</button>
+                <div class="item-header" style="display:flex;gap:6px;align-items:center;padding:6px 8px;">
+                    <input type="text" value="${nome.replace(/"/g, '&quot;')}"
+                        placeholder="Nome do Item..."
+                        style="flex:1;background:transparent;border:none;border-bottom:1px dashed #5a4a3a;
+                               color:#d4a574;font-family:'Special Elite',monospace;padding:4px 0;">
+                    <button class="btn btn-small"
+                        onclick="window.toggleDescricao(this)"
+                        style="padding:3px 8px;">📝</button>
+                    <button class="btn btn-small btn-danger"
+                        onclick="this.closest('.item-box').remove(); window.triggerSalvar()"
+                        style="padding:3px 8px;">🗑️</button>
                 </div>
-                <textarea placeholder="Detalhes e propriedades..." style="display: ${desc ? 'block' : 'none'};">${desc}</textarea>
+                <textarea placeholder="Detalhes e propriedades..."
+                    style="display:${desc ? 'block' : 'none'};width:100%;min-height:60px;
+                           background:#0a0908;border:none;border-top:1px dashed #3d2f24;
+                           color:#a09080;font-family:'Special Elite',monospace;
+                           font-size:0.85em;padding:8px 10px;resize:vertical;">${desc}</textarea>
             `;
             return div;
         }
 
+        // ── Adicionar item ───────────────────────────────
+        window.adicionarItemBase = () => {
+            document.getElementById('armazemContainer')
+                .appendChild(criarEstruturaItem('', ''));
+            window.triggerSalvar();
+        };
+
+        // ── Auto-save com debounce ───────────────────────
         let timeout;
         window.triggerSalvar = () => {
             clearTimeout(timeout);
+            mostrarStatus('saving', 'SALVANDO...');
             timeout = setTimeout(salvarBase, 1000);
         };
 

@@ -1,0 +1,79 @@
+/* Responsive styles for smaller screens */
+
+/* Tablet and smaller desktop */
+@media (max-width: 1024px) {
+  .ficha-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+
+  h1 {
+    font-size: 2.5em;
+  }
+
+  .secao {
+    padding: 12px;
+  }
+}
+
+/* Mobile devices */
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+
+  .ficha-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  h1 {
+    font-size: 2em;
+    margin-bottom: 20px;
+  }
+
+  .secao {
+    padding: 10px;
+  }
+
+  .secao-header {
+    font-size: 1em;
+    padding: 8px;
+  }
+
+  label {
+    font-size: 0.8em;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  select,
+  textarea {
+    padding: 8px 6px;
+    font-size: 0.9em;
+  }
+
+  .login-box {
+    padding: 24px 20px 20px;
+    max-width: 90%;
+  }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+  h1 {
+    font-size: 1.5em;
+    letter-spacing: 2px;
+  }
+
+  .secao-header {
+    font-size: 0.9em;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  select,
+  textarea {
+    padding: 6px 4px;
+  }
+}
